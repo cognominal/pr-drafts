@@ -1,0 +1,58 @@
+From a5df4d58653417ff281ac93b74d733500ff923bc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
+Date: Fri, 20 Nov 2026 17:19:46 +0100
+Subject: [PATCH] Test tapping a stdout after the process bound to it exited
+
+When a process whose stdin was bound to another process's stdout
+exits, MoarVM closed that descriptor with close() while the producer's
+pipe handle still owned it, and tapping the stdout afterwards made
+MoarVM abort. Run the scenario in a subprocess so an abort fails the
+test instead of killing the test file.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ S17-procasync/bind-handles.t | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/S17-procasync/bind-handles.t b/S17-procasync/bind-handles.t
+index e2c5889..f0916fc 100644
+--- a/S17-procasync/bind-handles.t
++++ b/S17-procasync/bind-handles.t
+@@ -2,7 +2,7 @@ use Test;
+ use lib $*PROGRAM.parent(2).add: 'packages/Test-Helpers';
+ use Test::Util;
+ 
+-plan 17;
++plan 18;
+ 
+ {
+     my $stdin-file  := make-temp-file
+@@ -139,4 +139,25 @@ plan 17;
+     }
+ }
+ 
++# A process's stdin bound to another's stdout is closed when the process
++# exits. Reading that stdout afterwards used to make MoarVM abort, as the
++# descriptor was closed behind the back of the pipe handle still owning it.
++{
++    my $code = Q:to/CODE/;
++        my $producer = Proc::Async.new($*EXECUTABLE, '-e', 'sleep 1; say "late"');
++        my $consumer = Proc::Async.new($*EXECUTABLE, '-e', '');
++        my $out = $producer.stdout;
++        $consumer.bind-stdin($out);
++        my $done = $producer.start;
++        await $consumer.start;
++        $out.tap(-> $ { });
++        my $ = await $done;
++        say "alive";
++        CODE
++    my $proc = run $*EXECUTABLE, '-e', $code, :out, :err;
++    is $proc.out.slurp(:close).trim, 'alive',
++        'Can tap a stdout after the process bound to it exited';
++    $proc.err.slurp(:close);
++}
++
+ # vim: expandtab shiftwidth=4
+-- 
+2.56.1
+

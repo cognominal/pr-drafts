@@ -1,0 +1,52 @@
+From 5b8779a8fd81e8a907221e771a9aaa5096782b38 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
+Date: Fri, 20 Nov 2026 17:11:30 +0100
+Subject: [PATCH] Write bytecode files to a temporary file and rename it into
+ place
+
+assemble_to_file opened the output with mode 'w', truncating the
+existing file and rewriting it in place. MoarVM mmaps bytecode files it
+loads, so a process still running from the old file (e.g. a REPL or
+long-running program using blib/CORE.c.setting.moarvm while Rakudo is
+being rebuilt) has its pages pulled from under it and dies of SIGBUS,
+or runs on a mix of old and new bytecode.
+
+Write to "$filename.tmp-$pid" instead and rename it over $filename once
+complete. Running processes keep the old inode until they exit, and
+readers never see a half-written file.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/vm/moar/QAST/QASTCompilerMAST.nqp | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/src/vm/moar/QAST/QASTCompilerMAST.nqp b/src/vm/moar/QAST/QASTCompilerMAST.nqp
+index 0b46be69d..ec74ece7f 100644
+--- a/src/vm/moar/QAST/QASTCompilerMAST.nqp
++++ b/src/vm/moar/QAST/QASTCompilerMAST.nqp
+@@ -2892,7 +2892,13 @@ class MoarVM::BytecodeWriter {
+     }
+     method assemble_to_file($filename) {
+         $!hll := self.add-string($!compunit.hll || '');
+-        my $file := nqp::open($filename, 'w');
++
++        # Write to a temporary file and rename it into place. Truncating
++        # $filename and rewriting it would pull the pages from under any
++        # running process that has the old file mapped, which then dies of
++        # SIGBUS; after a rename it keeps the old file until it exits.
++        my $tmp  := $filename ~ '.tmp-' ~ nqp::getpid();
++        my $file := nqp::open($tmp, 'w');
+ 
+         # skip the header since we don't have all the info yet, we'll go back and write it later
+         nqp::seekfh($file, 96, 0);
+@@ -2939,6 +2945,7 @@ class MoarVM::BytecodeWriter {
+         self.align_and_write($file);
+ 
+         nqp::closefh($file);
++        nqp::rename($tmp, $filename);
+     }
+     method get_frame_index(MAST::Frame $f) {
+         my int $idx := 0;
+-- 
+2.56.1
+

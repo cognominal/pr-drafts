@@ -1,0 +1,103 @@
+From 94401a2a957b1dda27191a02c3ec2e1c0f6ed6b0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
+Date: Fri, 20 Nov 2026 17:08:00 +0100
+Subject: [PATCH] Close a bound stdin through libuv, not behind its back
+
+When a process's stdin is bound to another process's stdout or stderr
+pipe with the "close" flag (Proc::Async.bind-stdin($other.stdout) in
+Rakudo), we closed the descriptor with close() once the process exited.
+That descriptor is still owned by the producer's uv_pipe_t, so libuv was
+left holding a dead, soon reused, descriptor. Reading the producer's
+output afterwards made libuv abort in uv__epoll_ctl_flush (EPOLL_CTL_ADD
+on a closed fd), and with a reused descriptor it could read from or
+close an unrelated file.
+
+Now we look for the libuv handle that owns the descriptor and uv_close
+it, which also stops its read watcher; a later uv_read_start on it just
+returns UV_EINVAL. Only a descriptor no handle owns is close()d as
+before, so the leak fixed in a71eee4c2 stays fixed.
+
+Reproducer (aborted every time before this change):
+
+    my $a = Proc::Async.new('sh', '-c', 'sleep 0.3; echo x');
+    my $b = Proc::Async.new('true');
+    my $s = $a.stdout;
+    $b.bind-stdin($s);
+    my $pa = $a.start;
+    await $b.start;
+    $s.tap(-> $ { });
+    try await $pa;
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/io/procops.c | 40 ++++++++++++++++++++++++++++++++--------
+ 1 file changed, 32 insertions(+), 8 deletions(-)
+
+diff --git a/src/io/procops.c b/src/io/procops.c
+index 71d04d20f..8b3b1975d 100644
+--- a/src/io/procops.c
++++ b/src/io/procops.c
+@@ -570,6 +570,34 @@ static void spawn_async_close(uv_handle_t *handle) {
+     MVM_free(handle);
+ }
+ 
++/* Closes the descriptor a process's stdin was bound to. It is usually the
++ * read end of another process's stdout or stderr pipe, and so is still owned
++ * by that process's uv_pipe_t on this loop. Closing it with close() behind
++ * libuv's back leaves the handle holding a dead (and soon reused) descriptor:
++ * a later read on it makes libuv abort when epoll_ctl fails, or reads from an
++ * unrelated descriptor. So when a handle owns the descriptor, close it through
++ * libuv, which also stops any read watcher. */
++typedef struct {
++    int          fd;
++    uv_handle_t *owner;
++} FdOwnerSearch;
++static void find_fd_owner(uv_handle_t *handle, void *arg) {
++    FdOwnerSearch *search = (FdOwnerSearch *)arg;
++    uv_os_fd_t fd;
++    if (!search->owner && !uv_is_closing(handle) && uv_fileno(handle, &fd) == 0
++            && (int)(MVMint64)fd == search->fd)
++        search->owner = handle;
++}
++static void close_bound_stdin(uv_loop_t *loop, SpawnInfo *si) {
++    FdOwnerSearch search = { si->stdin_to_close, NULL };
++    uv_walk(loop, find_fd_owner, &search);
++    if (search.owner)
++        uv_close(search.owner, NULL);
++    else
++        close(si->stdin_to_close);
++    si->stdin_to_close = 0;
++}
++
+ static void async_spawn_on_exit(uv_process_t *req, MVMint64 exit_status, int term_signal) {
+     /* Check we've got a callback to fire. */
+     SpawnInfo        *si  = (SpawnInfo *)req->data;
+@@ -607,10 +635,8 @@ static void async_spawn_on_exit(uv_process_t *req, MVMint64 exit_status, int ter
+     uv_mutex_unlock(mutex);
+ 
+     /* Close any stdin we were bound to. */
+-    if (si->stdin_to_close) {
+-        close(si->stdin_to_close);
+-        si->stdin_to_close = 0;
+-    }
++    if (si->stdin_to_close)
++        close_bound_stdin(req->loop, si);
+ 
+     /* Close handle. */
+     uv_close((uv_handle_t *)req, spawn_async_close);
+@@ -1079,10 +1105,8 @@ spawn_setup_error:
+                 MVM_repr_push_o(tc, ((MVMAsyncTask *)async_task)->body.queue, arr);
+             }
+ 
+-            if (si->stdin_to_close) {
+-                close(si->stdin_to_close);
+-                si->stdin_to_close = 0;
+-            }
++            if (si->stdin_to_close)
++                close_bound_stdin(loop, si);
+         }
+ 
+         MVM_io_eventloop_remove_active_work(tc, &(si->work_idx));
+-- 
+2.56.1
+
