@@ -89,7 +89,9 @@ Also checked:
 - `just check --changed`: all checks pass.
 - `go test` on internal/config, internal/input, internal/app and cmd/tuios: pass.
 - `TestIdleCostStaysLow`: pass, with renders=0 at idle.
-- Size, linux/amd64 release build: +106,496 bytes (49,483,936 → 49,590,432), leaving 409,568 under the ceiling. About 52 KB of that is the help text and code.
+- Size, release build (`just size`):
+  - linux/amd64: +106,496 bytes (49,483,936 → 49,590,432), 409,568 under the ceiling.
+  - windows/amd64: +107,008 bytes (49,915,904 → 50,022,912). **This is 22,912 bytes over the 50,000,000 ceiling**, and main had only 84,096 bytes of room there. About 57 KB is code, mostly drawing and walking the explainer, and 35 KB is its pclntab. Moving the page text into a static table saved nothing, so trimming alone will not fit this series. The binary-size job fails until the ceiling moves, in a commit of its own with `docs/perf.md`, which is the maintainer's call.
 
 ## Merge Danger
 

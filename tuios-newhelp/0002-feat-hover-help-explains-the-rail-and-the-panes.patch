@@ -1,0 +1,488 @@
+From 455661fc0bc2a660b33af8ad215572a7ae13e317 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
+Date: Fri, 20 Nov 2026 23:30:21 +0100
+Subject: [PATCH] feat: hover help explains the rail and the panes
+
+Hover help now explains the rail, one part per section the last frame
+drew, and every pane on the workspace, with its title bar and its body
+as parts. A section's keys are the ones that act while the rail has the
+keyboard. A hidden rail keeps a page with no rectangle, so the walk
+still reaches the key that shows it.
+
+The walk tests reach the desktop with shift+left now, since the rail
+and the panes sit between the dock and the desktop.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ e2e/tui/hover_help_test.go       |  98 +++++++++-
+ internal/app/hover_help.go       |   2 +
+ internal/app/hover_help_parts.go | 301 +++++++++++++++++++++++++++++++
+ 3 files changed, 391 insertions(+), 10 deletions(-)
+ create mode 100644 internal/app/hover_help_parts.go
+
+diff --git a/e2e/tui/hover_help_test.go b/e2e/tui/hover_help_test.go
+index 72481d5a5..130052b56 100644
+--- a/e2e/tui/hover_help_test.go
++++ b/e2e/tui/hover_help_test.go
+@@ -25,8 +25,14 @@ import (
+ //     screen that makes one, and the dock's counter names workspace 2 only
+ //     once it exists.
+ //
++//   - A page could be reached by the walk while the pointer finds nothing. The
++//     pane and rail tests hover a cell first and wait for that part's own page
++//     by its path, then walk.
++//
+ // Negative control, run: on a build of main, which has no hover help, every
+-// test fails at its first wait for the explainer.
++// test fails at its first wait for the explainer. On a build with hover help
++// over the dock and the desktop only, the pane test fails at the body's page
++// and the rail test at the rail's.
+ 
+ // The help keys as xterm sends them: CSI 1 ; 2 for shift, ESC before a
+ // character for alt.
+@@ -93,20 +99,20 @@ func TestHoverHelpExplainsTheDockCellUnderThePointer(t *testing.T) {
+ 	saveArtifact(t, term, dir, "mode-pill")
+ }
+ 
+-// TestHoverHelpWalksWithTheShiftArrows walks from the dock to the desktop and
+-// back, into the dock's parts and out, then shows every key and goes back.
++// TestHoverHelpWalksWithTheShiftArrows walks from the dock round to the
++// desktop and back, into the dock's parts and out, then shows every key and goes back.
+ func TestHoverHelpWalksWithTheShiftArrows(t *testing.T) {
+ 	term, dir := hoverHelpStart(t, "")
+ 	toggleHoverHelp(t, term)
+ 	waitText(t, term, "hover help opens on the dock", "Dock (", hhClose)
+ 	saveArtifact(t, term, dir, "1-dock")
+ 
+-	sendKeys(t, term, hhShiftRight)
+-	waitText(t, term, "shift+right reaches the desktop", "The desktop behind the panes")
++	sendKeys(t, term, hhShiftLeft)
++	waitText(t, term, "shift+left wraps round to the desktop", "The desktop behind the panes")
+ 	saveArtifact(t, term, dir, "2-desktop")
+ 
+-	sendKeys(t, term, hhShiftLeft)
+-	waitText(t, term, "shift+left comes back to the dock", "Dock (")
++	sendKeys(t, term, hhShiftRight)
++	waitText(t, term, "shift+right comes back to the dock", "Dock (")
+ 
+ 	sendKeys(t, term, hhShiftDown)
+ 	waitText(t, term, "shift+down goes into the dock", "Dock › ")
+@@ -136,7 +142,7 @@ func TestHoverHelpLeavesTypingToThePane(t *testing.T) {
+ }
+ 
+ // TestHoverHelpPassesPlainKeysThrough runs cat -v in the pane with hover help
+-// up, then presses up, down, h and the help keys. The pane must get the plain
++// up, then presses up, down, h and a help key. The pane must get the plain
+ // keys, and none of the help keys, which walk the explainer instead.
+ func TestHoverHelpPassesPlainKeysThrough(t *testing.T) {
+ 	term, dir := hoverHelpStart(t, "")
+@@ -145,8 +151,8 @@ func TestHoverHelpPassesPlainKeysThrough(t *testing.T) {
+ 	toggleHoverHelp(t, term)
+ 	waitText(t, term, "the explainer opens on the dock", "Dock (", hhClose)
+ 
+-	sendKeys(t, term, hhUp, hhDown, "h", hhShiftRight)
+-	waitText(t, term, "shift+right walks to the desktop", "The desktop behind the panes")
++	sendKeys(t, term, hhUp, hhDown, "h", hhShiftLeft)
++	waitText(t, term, "shift+left walks round to the desktop", "The desktop behind the panes")
+ 	sendKeys(t, term, tuitest.Enter)
+ 	// cat -v writes the line back after enter, so the line is on screen twice
+ 	// once the pane had it: the terminal's echo and cat's copy.
+@@ -208,3 +214,75 @@ func TestHoverHelpLetsClicksThrough(t *testing.T) {
+ 	waitText(t, term, "the explainer after the click", hhClose)
+ 	saveArtifact(t, term, dir, "clicked")
+ }
++
++// TestHoverHelpExplainsAPaneAndItsParts hovers a floating pane's body and its
++// title bar, then walks between them and out to the pane itself. The suite
++// pins the title bar to the bottom, so the test puts it on top, the default.
++// The body is hovered first, while the explainer is on the dock's page and
++// leaves the pane uncovered.
++func TestHoverHelpExplainsAPaneAndItsParts(t *testing.T) {
++	term, dir := hoverHelpStart(t, "[appearance]\nwindow_title_position = \"top\"\n")
++	toggleHoverHelp(t, term)
++	waitText(t, term, "the explainer", "Dock (", hhClose)
++	left, top := -1, -1
++	for y, line := range strings.Split(term.Screen().Text(), "\n") {
++		if before, _, ok := strings.Cut(line, "╭"); ok {
++			left, top = len([]rune(before)), y
++			break
++		}
++	}
++	if top < 0 {
++		t.Fatalf("no floating pane's top border on screen\n%s", term.Snapshot())
++	}
++	mouseHover(t, term, left+10, top+2)
++	waitText(t, term, "the body's page", "› Terminal: ")
++	saveArtifact(t, term, dir, "1-body")
++
++	mouseHover(t, term, left+10, top)
++	waitText(t, term, "the title bar's page", "› Title bar: ", "It names the pane")
++	saveArtifact(t, term, dir, "2-title-bar")
++
++	sendKeys(t, term, hhShiftDown)
++	waitText(t, term, "shift+down from the title bar reaches the body", "› Terminal: ")
++	sendKeys(t, term, hhShiftUp)
++	waitText(t, term, "shift+up from the body reaches the title bar", "› Title bar: ")
++	sendKeys(t, term, hhShiftUp)
++	waitText(t, term, "shift+up from the title bar reaches the pane", "(2 parts)", "One terminal.")
++	saveArtifact(t, term, dir, "3-pane")
++}
++
++// TestHoverHelpExplainsTheRailSections turns the rail on, walks into its
++// sections, and hovers one.
++func TestHoverHelpExplainsTheRailSections(t *testing.T) {
++	term, dir := hoverHelpStart(t, "[appearance.sidebar]\nenabled = true\n")
++	toggleHoverHelp(t, term)
++	waitText(t, term, "hover help opens on the dock", "Dock (", hhClose)
++
++	sendKeys(t, term, hhShiftRight)
++	waitText(t, term, "shift+right reaches the rail", "Rail (", "The rail is the column")
++	saveArtifact(t, term, dir, "1-rail")
++
++	sendKeys(t, term, hhShiftDown)
++	waitText(t, term, "shift+down goes into the rail's first section", "Rail › Sessions")
++	sendKeys(t, term, hhShiftDown)
++	waitText(t, term, "shift+down goes on to the next section", "Rail › Terminals")
++	saveArtifact(t, term, dir, "2-terminals")
++	sendKeys(t, term, hhShiftUp, hhShiftUp)
++	waitText(t, term, "shift+up twice comes out to the rail", "Rail (")
++
++	// The suite pins the rail to the left. Its sessions header is the row to
++	// hover, and the explainer does not cover it.
++	row := -1
++	for y, line := range strings.Split(term.Screen().Text(), "\n") {
++		if strings.HasPrefix(strings.TrimSpace(line), "sessions") {
++			row = y
++			break
++		}
++	}
++	if row < 0 {
++		t.Fatalf("no sessions header on screen\n%s", term.Snapshot())
++	}
++	mouseHover(t, term, 3, row)
++	waitText(t, term, "hovering the rail's sessions header", "Rail › Sessions")
++	saveArtifact(t, term, dir, "3-hover")
++}
+diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
+index aad2060e1..fda085649 100644
+--- a/internal/app/hover_help.go
++++ b/internal/app/hover_help.go
+@@ -372,6 +372,8 @@ func helpCap(keys []helpKey, n int) []helpKey {
+ func (m *OS) buildHelpComponents() []helpComponent {
+ 	comps := make([]helpComponent, 0, 24)
+ 	comps = append(comps, m.helpDockComponents()...)
++	comps = append(comps, m.helpRailComponents()...)
++	comps = append(comps, m.helpPaneComponents()...)
+ 	comps = append(comps, m.helpDesktopComponent())
+ 	return comps
+ }
+diff --git a/internal/app/hover_help_parts.go b/internal/app/hover_help_parts.go
+new file mode 100644
+index 000000000..77473dcc4
+--- /dev/null
++++ b/internal/app/hover_help_parts.go
+@@ -0,0 +1,301 @@
++package app
++
++import (
++	"image"
++	"strconv"
++	"strings"
++
++	"github.com/Gaurav-Gosain/tuios/internal/config"
++	"github.com/Gaurav-Gosain/tuios/internal/terminal"
++)
++
++// The rail and the panes as hover help explains them. The rail's parts are
++// its sections, read from the bands the last frame drew them in; a pane's
++// parts are its title bar and its body, read from the pane's own geometry.
++
++// helpScopedKeys is the first key the config binds to each action of one
++// table, with the description that action has in its scope. These keys act
++// only while that scope has the keyboard, such as the rail after the leader
++// then e.
++func (m *OS) helpScopedKeys(table config.Table, scope string, actions ...string) []helpKey {
++	if m.KeybindRegistry == nil {
++		return nil
++	}
++	out := make([]helpKey, 0, len(actions))
++	for _, action := range actions {
++		for _, key := range m.KeybindRegistry.Keys(table, action) {
++			if key == "" {
++				continue
++			}
++			out = append(out, helpKey{
++				press: helpPressLabel(key),
++				desc:  config.ScopedDescription(scope, action, 0),
++			})
++			break
++		}
++	}
++	return out
++}
++
++// helpRailBand is the primary rail's column on this frame, or the zero
++// rectangle when the rail is hidden.
++func (m *OS) helpRailBand() image.Rectangle {
++	w := m.GetSidebarWidth()
++	if w <= 0 {
++		return image.Rectangle{}
++	}
++	x := sidebarEdgeX(m.legacySidebarEdge(), w, m.GetRenderWidth())
++	top := m.viewReserve().Top
++	return image.Rect(x, top, x+w, top+m.ViewUsableHeight())
++}
++
++// helpRailComponents is the rail and one part per section the last frame
++// drew. A hidden rail keeps a component with no rectangle, so the walk still
++// reaches the key that shows it.
++func (m *OS) helpRailComponents() []helpComponent {
++	rect := m.helpRailBand()
++	position := m.Settings.SidebarPosition
++	if position == "" {
++		position = config.DefaultSidebarPosition
++	}
++	purpose := "The rail is the column beside the panes. It lists the sessions, the " +
++		"panes of the session it follows, the agents and the files below the focused " +
++		"pane, each in a section of its own. Its keys act once the leader then e has " +
++		"moved the keyboard into it."
++	if rect.Empty() {
++		purpose = "The rail is hidden, so there is nothing on screen to point at. " +
++			"The leader then b shows it. " + purpose
++	}
++	enter := m.helpKeys("prefix_explore", "prefix_toggle_sidebar")
++	keys := append(append([]helpKey{}, enter...), m.helpScopedKeys(config.TableSidebar,
++		config.ScopeSidebar, "cursor_down", "cursor_up", "section", "activate", "exit")...)
++	all := append(append([]helpKey{}, enter...), m.helpKeys("prefix_toggle_other_rail")...)
++	all = append(all, m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
++		"activate", "cursor_down", "cursor_up", "first", "last", "section", "collapse",
++		"expand", "menu", "palette", "narrow", "widen", "switch_edge", "help", "exit")...)
++	rail := helpComponent{
++		id:      "rail",
++		title:   "Rail",
++		purpose: purpose,
++		keys:    helpCap(keys, 7),
++		allKeys: all,
++		cli: []string{
++			"tuios set-config appearance.sidebar.enabled true",
++			"tuios set-config appearance.sidebar.position " + position,
++			"tuios set-config appearance.sidebar.width 30",
++			"tuios set-config appearance.sidebar.sections " + config.SidebarDefaultSections,
++		},
++		rect: rect,
++	}
++	out := []helpComponent{rail}
++	if rect.Empty() {
++		return out
++	}
++	for s := range sidebarSectionCount {
++		band := m.sidebarSectionY[s]
++		if band[1] <= band[0] {
++			continue
++		}
++		r := image.Rect(rect.Min.X, band[0], rect.Max.X, band[1]).Intersect(rect)
++		if r.Empty() {
++			continue
++		}
++		out = append(out, m.helpRailSection(s, r))
++	}
++	return out
++}
++
++// helpRailSection explains one section of the rail.
++func (m *OS) helpRailSection(s sidebarSection, rect image.Rectangle) helpComponent {
++	c := helpComponent{parent: "rail", rect: rect}
++	moves := m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
++		"cursor_down", "cursor_up", "section")
++	switch s {
++	case sidebarSectionSessions:
++		c.id, c.title = "rail/sessions", "Sessions"
++		c.purpose = "One row per session, on this machine and on the hosts it links to. " +
++			"Enter attaches the session under the cursor; the number before a name is " +
++			"its jump key. The + in the header makes a new one."
++		c.keys = m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
++			"activate", "new_session", "jump_1", "reorder_down", "reorder_up", "menu")
++		c.cli = []string{"tuios ls", "tuios new work", "tuios rename-session work", "tuios kill-session work"}
++	case sidebarSectionTerminals:
++		c.id, c.title = "rail/terminals", "Terminals"
++		c.purpose = "The panes of the session the rail follows. Enter focuses one, r " +
++			"renames it, and the + in the header opens another."
++		c.keys = m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
++			"activate", "new_window", "rename", "accent", "kill", "menu")
++		c.cli = []string{"tuios new-window", "tuios list-windows", "tuios focus-window <name>"}
++	case sidebarSectionAgents:
++		c.id, c.title = "rail/agents", "Agents"
++		c.purpose = "The agents running in panes: working, waiting for a person, or " +
++			"finished. The header's filter and sort pick which ones and in what order."
++		c.keys = append(m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
++			"activate", "agents_filter", "agents_sort", "mail"),
++			m.helpScopedKeys(config.TableSidebarAgents, config.ScopeSidebarAgents,
++				"agent_reply", "agent_review", "agent_subagents")...)
++		c.keys = append(c.keys, m.helpKeys("prefix_inbox", "prefix_next_attention")...)
++		c.cli = []string{"tuios list-agents"}
++	case sidebarSectionFiles:
++		c.id, c.title = "rail/files", "Files"
++		c.purpose = "What is in the focused pane's folder. Enter opens a folder, space " +
++			"previews a file, and the header's cd sends the pane there."
++		c.keys = m.helpScopedKeys(config.TableSidebarFiles, config.ScopeSidebarFiles,
++			"file_open", "file_quick_look", "file_edit", "file_copy", "file_cut",
++			"file_paste", "file_rename", "file_delete")
++		c.keys = append(c.keys, m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
++			"file_search")...)
++	case sidebarSectionGit:
++		c.id, c.title = "rail/git", "Git"
++		c.purpose = "The repository the focused pane is in, its branch, and how far " +
++			"that branch has drifted from its upstream."
++	case sidebarSectionCustom:
++		c.id, c.title = "rail/custom", "Custom section"
++		c.purpose = "Rows printed by a command of your own, set in " +
++			"[appearance.sidebar.custom]."
++		c.cli = []string{"tuios config edit"}
++	case sidebarSectionPane:
++		c.id, c.title = "rail/pane", "Rail pane"
++		c.purpose = "A live terminal drawn in the rail, set in [appearance.sidebar.pane]. " +
++			"Clicking it gives it the keyboard."
++		c.cli = []string{"tuios config edit"}
++	default:
++		c.id, c.title = "rail/section-"+strconv.Itoa(int(s)), "Section"
++		c.purpose = "A section of the rail."
++	}
++	if len(c.cli) == 0 {
++		c.cli = []string{"tuios set-config appearance.sidebar.sections " + config.SidebarDefaultSections}
++	}
++	c.allKeys = append(append([]helpKey{}, c.keys...), moves...)
++	c.keys = helpCap(c.keys, 7)
++	return c
++}
++
++// helpPaneComponents is every pane on the current workspace, each with its
++// title bar, when it draws one, and its body.
++func (m *OS) helpPaneComponents() []helpComponent {
++	var out []helpComponent
++	for _, w := range m.Windows {
++		if w == nil || w.Workspace != m.CurrentWorkspace || w.Minimized {
++			continue
++		}
++		pane, title, body := m.helpPaneRects(w)
++		if pane.Empty() {
++			continue
++		}
++		out = append(out, m.helpPaneComponent(w, pane))
++		if !title.Empty() {
++			out = append(out, m.helpPaneTitleComponent(w, title))
++		}
++		if !body.Empty() {
++			out = append(out, m.helpPaneBodyComponent(w, body))
++		}
++	}
++	return out
++}
++
++// helpPaneRects is where a pane, its title bar and its body are on screen. A
++// tiled pane is borderless and has no title bar of its own.
++func (m *OS) helpPaneRects(w *terminal.Window) (pane, title, body image.Rectangle) {
++	pane = image.Rect(w.X, w.Y, w.X+w.Width, w.Y+w.Height)
++	off := w.BorderOffset()
++	body = image.Rect(w.X+off, w.Y+off, w.X+off+w.ContentWidth(), w.Y+off+w.ContentHeight())
++	if off > 0 && m.Settings.WindowTitlePosition != "hidden" && w.Height > 1 {
++		if m.Settings.WindowTitlePosition == "bottom" {
++			title = image.Rect(w.X, w.Y+w.Height-1, w.X+w.Width, w.Y+w.Height)
++		} else {
++			title = image.Rect(w.X, w.Y, w.X+w.Width, w.Y+1)
++		}
++	}
++	if v := m.sessionView; v.on {
++		shift := image.Pt(v.dx, v.dy)
++		pane = pane.Add(shift).Intersect(v.clip)
++		title = title.Add(shift).Intersect(v.clip)
++		body = body.Add(shift).Intersect(v.clip)
++	}
++	return pane, title, body
++}
++
++// helpPaneName is the name a pane's pages call it by.
++func helpPaneName(w *terminal.Window) string {
++	if name := w.Title(); name != "" {
++		return name
++	}
++	return w.ID
++}
++
++// helpShellQuote quotes a pane name for a shell line, so a name with spaces
++// reaches the CLI as one argument.
++func helpShellQuote(s string) string {
++	if s != "" && !strings.ContainsAny(s, " \t\n'\"\\$`!*?[]{}()<>|&;#~") {
++		return s
++	}
++	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
++}
++
++func (m *OS) helpPaneComponent(w *terminal.Window, rect image.Rectangle) helpComponent {
++	name := helpPaneName(w)
++	keys := m.helpKeys("prefix_fullscreen", "split_vertical", "split_horizontal",
++		"close_window", "prefix_minimize", "prefix_next_window", "prefix_prev_window")
++	return helpComponent{
++		id:    "pane:" + w.ID,
++		title: "Pane: " + name,
++		purpose: "One terminal. It runs its own program; in terminal mode the keys go " +
++			"to that program, and in window mode they move and arrange the panes. The " +
++			"title bar names it, when it has one, and the body is the terminal.",
++		keys: helpCap(keys, 7),
++		allKeys: append(keys, m.helpKeys("prefix_window", "prefix_layout",
++			"prefix_toggle_tiling", "prefix_rename_window")...),
++		cli: []string{
++			"tuios split-window vertical",
++			"tuios set-layout <layout>",
++			"tuios close-window " + helpShellQuote(name),
++		},
++		rect: rect,
++	}
++}
++
++func (m *OS) helpPaneTitleComponent(w *terminal.Window, rect image.Rectangle) helpComponent {
++	name := helpPaneName(w)
++	keys := m.helpKeys("prefix_rename_window", "prefix_fullscreen", "prefix_minimize",
++		"close_window")
++	return helpComponent{
++		id:     "pane:" + w.ID + "/title",
++		parent: "pane:" + w.ID,
++		title:  "Title bar: " + name,
++		purpose: "The pane's title bar. It names the pane and carries its close, " +
++			"minimize and zoom buttons. Dragging it moves a floating pane.",
++		keys:    keys,
++		allKeys: append(keys, m.helpKeys("prefix_window")...),
++		cli: []string{
++			"tuios set-window --name work",
++			"tuios set-config appearance.window_title_position top",
++			"tuios set-config appearance.window_title_style pill",
++			"tuios set-config appearance.hide_window_buttons false",
++			"tuios set-config appearance.window_button_position right",
++		},
++		rect: rect,
++	}
++}
++
++func (m *OS) helpPaneBodyComponent(w *terminal.Window, rect image.Rectangle) helpComponent {
++	name := helpPaneName(w)
++	keys := m.helpKeys("prefix_selection", "prefix_scrollback", "prefix_screenshot",
++		"split_vertical", "split_horizontal")
++	return helpComponent{
++		id:     "pane:" + w.ID + "/body",
++		parent: "pane:" + w.ID,
++		title:  "Terminal: " + name,
++		purpose: "The terminal itself. In terminal mode every key but the leader goes " +
++			"to its program. Copy mode moves over the scrollback without sending " +
++			"anything.",
++		keys:    keys,
++		allKeys: append(keys, m.helpKeys("prefix_fullscreen", "close_window")...),
++		cli: []string{
++			"tuios send-keys <text>",
++			"tuios capture-pane -w " + helpShellQuote(name),
++			"tuios set-config appearance.dim_unfocused 20",
++		},
++		rect: rect,
++	}
++}
+-- 
+2.56.1
+

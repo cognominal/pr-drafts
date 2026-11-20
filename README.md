@@ -128,8 +128,8 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 
 | # | Branch | What | Status | Depends on |
 |---|---|---|---|---|
-| T1 | `feat/newhelp-1-engine` | engine, dock and desktop, help keys, KEYBINDINGS.md | tested, unsubmitted | origin/main 4c12ece99 |
-| T2 | `feat/newhelp-2-rail-panes` | the rail and its sections, a pane's title bar and body | not started | T1 |
+| T1 | `feat/newhelp-1-engine` | engine, dock and desktop, help keys, KEYBINDINGS.md | tested, unsubmitted; windows/amd64 over the size ceiling | origin/main 4c12ece99 |
+| T2 | `feat/newhelp-2-rail-panes` | the rail and its sections, a pane's title bar and body | tested, unsubmitted | T1 |
 | T3 | `feat/newhelp-3-leader` | leader menu: explainer hides while it is up, Help entry, footer | not started | T2 |
 | T4 | `feat/newhelp-4-dock-control` | opt-in `?` control on the dock | not started | T3 |
 
@@ -144,8 +144,23 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - `just check --changed` green
   - the unit tests of config, input, app and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
-  - size: +106,496 B on linux/amd64
+  - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. **Windows is 22,912 B over the 50 MB ceiling** (main has 84,096 B of room), so the binary-size job fails. Needs the maintainer to raise the ceiling in its own commit.
 - **To submit:**
   1. Push the branch to your fork.
   2. Open the PR against `Gaurav-Gosain/tuios` `main` with `pr1-engine.md`, marked ready only after `just check --changed`.
   3. The maintainer lands it with the `full-suite` label.
+
+### T2 Hover help explains the rail and the panes
+
+- **Status:** tested, unsubmitted
+- **Commit:** 455661fc0 on T1 0dfbe4864
+- **Patch:** `tuios-newhelp/0002-feat-hover-help-explains-the-rail-and-the-panes.patch`
+- **PR body:** `tuios-newhelp/pr2-rail-panes.md`
+- **Tested:**
+  - 9 hover help e2e tests pass on the real and sim backends
+  - the 2 new tests fail on a T1 build
+  - `just check --changed` green
+  - the unit tests pass
+  - `TestIdleCostStaysLow` passes
+  - size against T1: +24,576 B on linux/amd64, +26,112 B on windows/amd64 (still over the ceiling, as T1 is)
+- **To submit:** after T1 is open, push the branch and open the PR with `pr2-rail-panes.md`, replacing `#T1` with T1's number.
