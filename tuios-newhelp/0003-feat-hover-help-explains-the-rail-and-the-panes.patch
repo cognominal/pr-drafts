@@ -1,7 +1,7 @@
-From 89d45889020d3cdd57b9d3d3326138e74be8b105 Mon Sep 17 00:00:00 2001
+From db0f5a3d530204e2f053f9d7ada6e385c312f8ff Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 23:30:21 +0100
-Subject: [PATCH] feat: hover help explains the rail and the panes
+Subject: [PATCH 3/5] feat: hover help explains the rail and the panes
 
 Hover help now explains the rail, one part per section the last frame
 drew, and every pane on the workspace, with its title bar and its body
@@ -164,7 +164,7 @@ index 72481d5a5..130052b56 100644
 +	saveArtifact(t, term, dir, "3-hover")
 +}
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index aad2060e1..fda085649 100644
+index f21c8a1ed..3137c0564 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
 @@ -372,6 +372,8 @@ func helpCap(keys []helpKey, n int) []helpKey {

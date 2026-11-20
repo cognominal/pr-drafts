@@ -28,7 +28,7 @@ Help keys (rebindable, footer shows the bound ones):
 | `help_scroll_up` / `help_scroll_down` | shift+pgup, alt+shift+up / shift+pgdown, alt+shift+down |
 | `help_keys` | alt+shift+h |
 
-Hover help is a view, not a mode: every other key reaches the pane. `?` still opens the key list. This part covers the dock, each dock cell, and the desktop. The rail, panes and the leader menu come in parts 2 and 3.
+Hover help is a view, not a mode: every other key reaches the pane. `?` still opens the key list. This part covers the dock, each dock cell, and the desktop. The rail and panes come in part 2, the leader menu in part 3, and the dock `?` control in part 4.
 
 The explainer on the dock's mode pill (`TestHoverHelpExplainsTheDockCellUnderThePointer`):
 

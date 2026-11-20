@@ -122,7 +122,7 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 # tuios: hover help (newhelp)
 
-Status as of 2026-11-20. **Nothing has been pushed, submitted or posted.**
+Status as of 2026-11-21. **Nothing has been pushed, submitted or posted.**
 
 A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current main, as **hover help**: Ctrl+b h toggles a borderless explainer next to the thing it explains. No localisation. Worktree: `~/.local/share/tuios/worktrees/Gaurav-Gosain---tuios/newhelp`. Branches `feat/newhelp-N-<topic>`, each on the one before. Files are in `tuios-newhelp/`.
 
@@ -130,13 +130,13 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 |---|---|---|---|---|
 | T1 | `feat/newhelp-1-engine` | engine, dock and desktop, help keys, KEYBINDINGS.md | tested, unsubmitted; raises the size ceiling to 50.5 MB | origin/main 4c12ece99 |
 | T2 | `feat/newhelp-2-rail-panes` | the rail and its sections, a pane's title bar and body | tested, unsubmitted | T1 |
-| T3 | `feat/newhelp-3-leader` | leader menu: explainer hides while it is up, Help entry, footer | not started | T2 |
-| T4 | `feat/newhelp-4-dock-control` | opt-in `?` control on the dock | not started | T3 |
+| T3 | `feat/newhelp-3-leader` | the explainer stands aside while the leader menu is up | tested, unsubmitted | T2 |
+| T4 | `feat/newhelp-4-dock-control` | opt-in `?` control on the dock | tested, unsubmitted | T3 |
 
 ### T1 Hover help explains the dock and the desktop
 
 - **Status:** tested, unsubmitted
-- **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then 3f98fd33f, on origin/main 4c12ece99
+- **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then ee501bdbe, on origin/main 4c12ece99
 - **Patches:** `tuios-newhelp/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`, `tuios-newhelp/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`
 - **PR body:** `tuios-newhelp/pr1-engine.md`
 - **Tested:**
@@ -153,7 +153,7 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 ### T2 Hover help explains the rail and the panes
 
 - **Status:** tested, unsubmitted
-- **Commit:** 89d458890 on T1 3f98fd33f
+- **Commit:** db0f5a3d5 on T1 ee501bdbe
 - **Patch:** `tuios-newhelp/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`
 - **PR body:** `tuios-newhelp/pr2-rail-panes.md`
 - **Tested:**
@@ -164,3 +164,32 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - `TestIdleCostStaysLow` passes
   - size against T1: +24,576 B on linux/amd64, +26,112 B on windows/amd64, 450,976 B under the new ceiling
 - **To submit:** after T1 is open, push the branch and open the PR with `pr2-rail-panes.md`, replacing `#T1` with T1's number.
+
+### T3 Hover help stands aside for the leader menu
+
+- **Status:** tested, unsubmitted
+- **Commit:** 393091fff on T2 db0f5a3d5
+- **Patch:** `tuios-newhelp/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch`
+- **PR body:** `tuios-newhelp/pr3-leader.md`
+- **Tested:**
+  - 10 hover help e2e tests pass on the real and sim backends
+  - the new test fails on a T2 build, and on a build without the pointer freeze
+  - `just check --changed` green
+  - `TestIdleCostStaysLow` passes, renders=0
+  - size: +0 B on all three targets
+- **To submit:** after T2 is open, push the branch and open the PR with `pr3-leader.md`, replacing `#T2`.
+
+### T4 An opt-in ? control on the dock
+
+- **Status:** tested, unsubmitted
+- **Commit:** f2d94efd1 on T3 393091fff
+- **Patch:** `tuios-newhelp/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`
+- **PR body:** `tuios-newhelp/pr4-dock-control.md`
+- **Tested:**
+  - 11 hover help e2e tests pass on the real and sim backends
+  - the new test fails on a T3 build
+  - `just check --changed` green
+  - the unit tests of config, app, input and cmd/tuios pass
+  - `TestIdleCostStaysLow` passes
+  - size against T3: +0 B linux/amd64, +16,512 B darwin/arm64, +2,560 B windows/amd64 (448,416 B under the ceiling)
+- **To submit:** after T3 is open, push the branch and open the PR with `pr4-dock-control.md`, replacing `#T3`.

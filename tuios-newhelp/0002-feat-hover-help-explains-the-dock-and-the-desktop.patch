@@ -1,7 +1,7 @@
-From 3f98fd33fe75d815aa0e5900f89ad10df898c726 Mon Sep 17 00:00:00 2001
+From ee501bdbe879a6dce303a06bff3b3f37bc12e0d0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 22:59:18 +0100
-Subject: [PATCH 2/2] feat: hover help explains the dock and the desktop
+Subject: [PATCH 2/5] feat: hover help explains the dock and the desktop
 
 Ctrl+b h (toggle_hover_help) turns on hover help, and Ctrl+b h turns it
 off. The explainer is a borderless overlay on the theme's panel ground,
@@ -19,7 +19,7 @@ the keys the config binds:
 
 Hover help is a view, not a mode: every other key reaches the pane,
 clicks reach what they land on, and the wheel scrolls the explainer only
-over it. The explainer stands aside while the leader waits for a key.
+over it.
 
 This first part explains the dock, each cell it drew, and the desktop.
 The dock records one hit per named cell as it draws, so the explainer
@@ -27,12 +27,12 @@ places itself against the cells on screen.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- docs/KEYBINDINGS.md                 |  40 ++
+ docs/KEYBINDINGS.md                 |  39 ++
  docs/keybindings-defaults.md        |  13 +
  e2e/tui/hover_help_test.go          | 210 ++++++
  internal/app/dock_components.go     |  30 +-
  internal/app/dock_helpers.go        |  15 +
- internal/app/hover_help.go          | 978 ++++++++++++++++++++++++++++
+ internal/app/hover_help.go          | 976 ++++++++++++++++++++++++++++
  internal/app/os.go                  |  23 +-
  internal/app/program_options.go     |   6 +
  internal/app/render.go              |   6 +
@@ -49,17 +49,17 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  internal/input/handler.go           |  24 +
  internal/input/hover_help.go        |  48 ++
  internal/input/reachability_test.go |  14 +-
- 22 files changed, 1479 insertions(+), 22 deletions(-)
+ 22 files changed, 1476 insertions(+), 22 deletions(-)
  create mode 100644 e2e/tui/hover_help_test.go
  create mode 100644 internal/app/hover_help.go
  create mode 100644 internal/config/help_actions.go
  create mode 100644 internal/input/hover_help.go
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 7e654cffe..2de525b10 100644
+index 7e654cffe..126eb80d8 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -914,6 +914,46 @@ the text into the focused pane. This action has no default key. Bind it, or
+@@ -914,6 +914,45 @@ the text into the focused pane. This action has no default key. Bind it, or
  run it from the command palette. Set `hints.all_panes = true` to make
  `Ctrl+B F` do the same.
  
@@ -89,8 +89,7 @@ index 7e654cffe..2de525b10 100644
 +to the pane or to the open panel as usual, and so does a help key while a panel,
 +hints mode or the leader has the keyboard. A click goes to what it lands on. A
 +click on the explanation does nothing. The wheel scrolls the explanation when
-+the pointer is over it. The explanation hides while the leader waits for a
-+key.
++the pointer is over it.
 +
 +Bind the help keys in `[keybindings.help]`. The explanation's last line shows
 +the keys you bound.
@@ -482,10 +481,10 @@ index 308c95170..5cee64074 100644
  // message is a transient claim on the right-hand end rather than a cell, so
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
 new file mode 100644
-index 000000000..aad2060e1
+index 000000000..f21c8a1ed
 --- /dev/null
 +++ b/internal/app/hover_help.go
-@@ -0,0 +1,978 @@
+@@ -0,0 +1,976 @@
 +package app
 +
 +import (
@@ -1162,12 +1161,10 @@ index 000000000..aad2060e1
 +const helpLayerID = "hover-help"
 +
 +// renderHoverHelp draws the explainer for the target. It runs after the dock
-+// has drawn, so the rectangles it places against are the ones on screen. It
-+// stands aside while the leader or one of its menus waits for a key: that menu
-+// is the next thing read.
++// has drawn, so the rectangles it places against are the ones on screen.
 +func (m *OS) renderHoverHelp() *lipgloss.Layer {
 +	h := &m.hoverHelp
-+	if !h.on || m.MenuOpen() {
++	if !h.on {
 +		h.rect = image.Rectangle{}
 +		return nil
 +	}

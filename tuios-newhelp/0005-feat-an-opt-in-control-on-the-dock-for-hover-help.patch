@@ -1,0 +1,336 @@
+From f2d94efd17e38fcbb555ef163a1c8d5ac8996b23 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
+Date: Sat, 21 Nov 2026 00:54:39 +0100
+Subject: [PATCH 5/5] feat: an opt-in ? control on the dock for hover help
+
+The dock component "help" draws a ? cell. A click turns hover help on or
+off, as Ctrl+b h does, and the cell is lit while hover help is on: on the
+accent ground, and in reverse video at 16 colours. It is in no default
+list; a [dock] list that names "help" draws it. Hovering it with hover help
+on explains it.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ docs/CONFIGURATION.md           |  6 +++-
+ docs/KEYBINDINGS.md             |  9 ++++++
+ docs/config-options.md          |  6 ++--
+ docs/look-keys.json             |  9 ++++--
+ e2e/tui/hover_help_test.go      | 56 ++++++++++++++++++++++++++++++++-
+ internal/app/dock_components.go | 28 ++++++++++++++---
+ internal/app/hover_help.go      |  6 ++++
+ internal/config/dock.go         |  5 +++
+ internal/input/mouse_click.go   |  7 +++++
+ 9 files changed, 120 insertions(+), 12 deletions(-)
+
+diff --git a/docs/CONFIGURATION.md b/docs/CONFIGURATION.md
+index a6b99f8b3..4f55afcb7 100644
+--- a/docs/CONFIGURATION.md
++++ b/docs/CONFIGURATION.md
+@@ -2192,6 +2192,8 @@ exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a
+ count and a percent, `3 copies 42%`. `waiting` means a link is down, and
+ `1 failed` stays until you open the Copies panel. A click opens the panel. Add
+ `transfers` to your own `right` list to see it there.
++`help` shows `?`, which is in no default list. A click turns hover help on or
++off, and it is lit while hover help is on.
+ `session` shows the session name, workspace and pane, `main 2:1`, and is in no
+ default list. `[dock.session]` takes `format` (`{session}`, `{workspace}`,
+ `{pane}`) and the cell style keys `fg`, `bg`, `bold`, `cap_left` and
+@@ -5247,7 +5249,7 @@ on-click = "tuios new-window log -- git log --oneline -20"
+ 
+ These lists are the default. A missing list uses the default. An empty list (`left = []`) draws nothing on that side.
+ 
+-The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `transfers`, `notifications`, `copy-help`, `cpu`, `ram`, `clock`, `session-controls`, `session` and `buttons`. Listing one lets it draw. It still needs its own condition, so `cpu` still needs `show_cpu`. `copy-help` shows the keys of copy mode, multi copy mode and hints mode while the mode is open. See [Mode keys in the dock](KEYBINDINGS.md#mode-keys-in-the-dock).
++The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `transfers`, `notifications`, `copy-help`, `cpu`, `ram`, `clock`, `session-controls`, `session`, `buttons` and `help`. Listing one lets it draw. It still needs its own condition, so `cpu` still needs `show_cpu`. `copy-help` shows the keys of copy mode, multi copy mode and hints mode while the mode is open. See [Mode keys in the dock](KEYBINDINGS.md#mode-keys-in-the-dock).
+ 
+ `session-controls` shows an agents button when the session has an agent pane. The button opens the agents view, the same as `Ctrl+B i`. When agents wait for you, the button shows how many in the attention colour.
+ 
+@@ -5255,6 +5257,8 @@ The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `t
+ 
+ `transfers` shows the copies between machines. It shows nothing while no copy exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a count and a percent, `3 copies 42%`. `waiting` means a link is down. `1 failed` stays until you open the Copies panel. A click opens the [Copies panel](KEYBINDINGS.md#copies-between-machines).
+ 
++`help` shows `?`, which is in no default list. A click turns [hover help](KEYBINDINGS.md#hover-help) on or off, the same as `Ctrl+B h`. It is lit while hover help is on.
++
+ `[dock.clock]` takes `format`, a Go time layout. A layout without seconds refreshes once a minute. `session` shows the session name, the workspace and the pane, such as `main 2:1`. It is in no default list. `[dock.session]` takes `format`, with `{session}`, `{workspace}` and `{pane}`. It also takes the cell style keys `fg`, `bg`, `bold`, `cap_left` and `cap_right`. `[dock.custom.NAME]` takes the same style keys. Colours are `#rrggbb`. When the `center` list has a clock or a custom cell, the centre is at the middle of the terminal. A notification does not move it, and it does not shorten the minimized pane labels. On a crowded bar, the centre moves left to keep the cells on the right on the screen. Click a cut notification to read the full message.
+ 
+ ### Custom components
+diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
+index 3e1bb53b8..d4195e106 100644
+--- a/docs/KEYBINDINGS.md
++++ b/docs/KEYBINDINGS.md
+@@ -955,6 +955,15 @@ help_keys = ["alt+shift+k"]
+ 
+ `?` still shows the list of all keys.
+ 
++The dock can carry a `?` control. It is in no default list: add `help` to a
++`[dock]` list to draw it. A click on it turns hover help on or off, and it is
++lit while hover help is on.
++
++```toml
++[dock]
++left = ["mode", "workspaces", "trail", "tape", "help"]
++```
++
+ ## Links
+ 
+ `Ctrl+click` on a link opens it. `Shift+click` also opens it, but most
+diff --git a/docs/config-options.md b/docs/config-options.md
+index 70e2a9640..ebed41ce5 100644
+--- a/docs/config-options.md
++++ b/docs/config-options.md
+@@ -620,9 +620,9 @@ The description of a table names its keys.
+ 
+ | Key | Type | Default | Description |
+ |---|---|---|---|
+-| <a id="dock.left"></a>`dock.left` | list | `["mode", "workspaces", "trail", "tape"]` | The built-in cells on the left end of the dock, in order. An empty list draws nothing there. A look can set it. Values: `buttons`, `clock`, `copy-help`, `cpu`, `mode`, `notifications`, `ram`, `session`, `session-controls`, `tape`, `trail`, `transfers`, `windows`, `workspaces`. |
+-| <a id="dock.center"></a>`dock.center` | list | `["windows"]` | The built-in cells in the middle of the dock, in order. An empty list draws nothing there. A look can set it. Values: `buttons`, `clock`, `copy-help`, `cpu`, `mode`, `notifications`, `ram`, `session`, `session-controls`, `tape`, `trail`, `transfers`, `windows`, `workspaces`. |
+-| <a id="dock.right"></a>`dock.right` | list | `["transfers", "notifications", "copy-help", "cpu", "ram", "clock", "session-controls"]` | The built-in cells on the right end of the dock, in order. An empty list draws nothing there. A look can set it. Values: `buttons`, `clock`, `copy-help`, `cpu`, `mode`, `notifications`, `ram`, `session`, `session-controls`, `tape`, `trail`, `transfers`, `windows`, `workspaces`. |
++| <a id="dock.left"></a>`dock.left` | list | `["mode", "workspaces", "trail", "tape"]` | The built-in cells on the left end of the dock, in order. An empty list draws nothing there. A look can set it. Values: `buttons`, `clock`, `copy-help`, `cpu`, `help`, `mode`, `notifications`, `ram`, `session`, `session-controls`, `tape`, `trail`, `transfers`, `windows`, `workspaces`. |
++| <a id="dock.center"></a>`dock.center` | list | `["windows"]` | The built-in cells in the middle of the dock, in order. An empty list draws nothing there. A look can set it. Values: `buttons`, `clock`, `copy-help`, `cpu`, `help`, `mode`, `notifications`, `ram`, `session`, `session-controls`, `tape`, `trail`, `transfers`, `windows`, `workspaces`. |
++| <a id="dock.right"></a>`dock.right` | list | `["transfers", "notifications", "copy-help", "cpu", "ram", "clock", "session-controls"]` | The built-in cells on the right end of the dock, in order. An empty list draws nothing there. A look can set it. Values: `buttons`, `clock`, `copy-help`, `cpu`, `help`, `mode`, `notifications`, `ram`, `session`, `session-controls`, `tape`, `trail`, `transfers`, `windows`, `workspaces`. |
+ | <a id="dock.custom.NAME.command"></a>`dock.custom.NAME.command` | string | required | The command of your own dock cell, run with sh -c. The first line of its output is the text of the cell. |
+ | <a id="dock.custom.NAME.refresh"></a>`dock.custom.NAME.refresh` | string | `once` | When the command runs: once, a duration such as 30s, push (it stays running and each line is an update), or event:TYPE[,TYPE]. |
+ | <a id="dock.custom.NAME.on-click"></a>`dock.custom.NAME.on-click` | string | empty | A command to run with sh -c when you click the cell. |
+diff --git a/docs/look-keys.json b/docs/look-keys.json
+index 9ab7359c6..64bccc57d 100644
+--- a/docs/look-keys.json
++++ b/docs/look-keys.json
+@@ -785,6 +785,7 @@
+         "clock",
+         "copy-help",
+         "cpu",
++        "help",
+         "mode",
+         "notifications",
+         "ram",
+@@ -796,7 +797,7 @@
+         "windows",
+         "workspaces"
+       ],
+-      "max_items": 28,
++      "max_items": 30,
+       "max_bytes": 32
+     },
+     {
+@@ -815,6 +816,7 @@
+         "clock",
+         "copy-help",
+         "cpu",
++        "help",
+         "mode",
+         "notifications",
+         "ram",
+@@ -826,7 +828,7 @@
+         "windows",
+         "workspaces"
+       ],
+-      "max_items": 28,
++      "max_items": 30,
+       "max_bytes": 32
+     },
+     {
+@@ -839,6 +841,7 @@
+         "clock",
+         "copy-help",
+         "cpu",
++        "help",
+         "mode",
+         "notifications",
+         "ram",
+@@ -850,7 +853,7 @@
+         "windows",
+         "workspaces"
+       ],
+-      "max_items": 28,
++      "max_items": 30,
+       "max_bytes": 32
+     },
+     {
+diff --git a/e2e/tui/hover_help_test.go b/e2e/tui/hover_help_test.go
+index 051776f90..3ad4fa0ce 100644
+--- a/e2e/tui/hover_help_test.go
++++ b/e2e/tui/hover_help_test.go
+@@ -32,6 +32,11 @@ import (
+ //     find the dock's page. The pointer goes to the mode pill, whose page is
+ //     "Dock › Mode", and the test waits for "Dock (" with no "Dock › Mode".
+ //
++//   - A ? on the dock could come from another cell, and the explainer could
++//     open by another path. The control is found as a lone ? on the dock's
++//     row, the default dock has none, and only the click comes between the
++//     dock with no explainer and the dock with one.
++//
+ //   - A page could be reached by the walk while the pointer finds nothing. The
+ //     pane and rail tests hover a cell first and wait for that part's own page
+ //     by its path, then walk.
+@@ -42,7 +47,8 @@ import (
+ // and the rail test at the rail's. On a build without the leader menu's
+ // stand-aside, the leader test fails waiting for the explainer to go, and on
+ // one that hides the explainer but lets the pointer retarget under the menu,
+-// it fails waiting for the dock's page after the menu.
++// it fails waiting for the dock's page after the menu. On a build without the
++// dock control, the dock test fails waiting for the ? on the dock.
+ 
+ // The help keys as xterm sends them: CSI 1 ; 2 for shift, ESC before a
+ // character for alt.
+@@ -321,3 +327,51 @@ func TestHoverHelpStandsAsideForTheLeaderMenu(t *testing.T) {
+ 	}
+ 	saveArtifact(t, term, dir, "2-back")
+ }
++
++// hhDockControl finds the dock's ? control on the last row and returns its
++// column, or -1.
++func hhDockControl(term *tuitest.Terminal) (col, row int) {
++	_, rows := term.Screen().Size()
++	dock := []rune(strings.Split(term.Screen().Text(), "\n")[rows-1])
++	for i := 1; i+1 < len(dock); i++ {
++		if dock[i] == '?' && dock[i-1] == ' ' && dock[i+1] == ' ' {
++			return i, rows - 1
++		}
++	}
++	return -1, rows - 1
++}
++
++// TestHoverHelpDockControl puts the ? control on the dock through a [dock]
++// list. A click turns hover help on, the control is lit while it is, hovering
++// it explains it, and a second click turns hover help off. The default dock
++// has no control.
++func TestHoverHelpDockControl(t *testing.T) {
++	plain, _ := hoverHelpStart(t, "")
++	if col, _ := hhDockControl(plain); col >= 0 {
++		t.Fatalf("the default dock draws the ? control\n%s", plain.Snapshot())
++	}
++
++	term, dir := hoverHelpStart(t, "[dock]\nleft = [\"mode\", \"workspaces\", \"trail\", \"tape\", \"help\"]\n")
++	waitTextOf(t, "the ? control on the dock", uiTimeout, func() string { return term.Screen().Text() },
++		func(string) bool { c, _ := hhDockControl(term); return c >= 0 })
++	col, row := hhDockControl(term)
++	off := term.Screen().Cell(col, row)
++	saveArtifact(t, term, dir, "1-off")
++
++	clickAt(t, term, col, row, 1)
++	waitText(t, term, "the explainer after a click on ?", hhClose)
++	waitTextOf(t, "the ? control lit", uiTimeout, func() string { return term.Screen().Text() },
++		func(string) bool {
++			on := term.Screen().Cell(col, row)
++			return on.Content == "?" && (on.Bg != off.Bg || on.Reverse != off.Reverse)
++		})
++	saveArtifact(t, term, dir, "2-on")
++
++	mouseHover(t, term, col, row)
++	waitText(t, term, "the control's page", "Dock › Help control", "turns hover help on or off")
++	saveArtifact(t, term, dir, "3-page")
++
++	clickAt(t, term, col, row, 1)
++	waitGone(t, term, "the explainer after a second click on ?", hhClose)
++	saveArtifact(t, term, dir, "4-off-again")
++}
+diff --git a/internal/app/dock_components.go b/internal/app/dock_components.go
+index 131abf870..a88885986 100644
+--- a/internal/app/dock_components.go
++++ b/internal/app/dock_components.go
+@@ -214,6 +214,9 @@ func (m *OS) dockCustomCell(name string) string {
+ 	if strings.HasPrefix(name, config.DockPluginPrefix) {
+ 		return m.pluginCellDrawn(name)
+ 	}
++	if name == config.DockComponentHelp {
++		return m.dockHelpCell()
++	}
+ 	text := m.dockEngine.Text(name)
+ 	if name == config.DockComponentClock && text == "" {
+ 		// The clock is a built-in that carries a value, so it draws through the
+@@ -321,14 +324,31 @@ func (m *OS) dockCustomCells(names []string) (cells []string, widths []int, keys
+ // value the engine holds, rather than from model state the renderer reads.
+ func dockCellComponent(name string) bool {
+ 	return strings.HasPrefix(name, config.DockCustomPrefix) || strings.HasPrefix(name, config.DockPluginPrefix) || name == config.DockComponentClock ||
+-		name == config.DockComponentTransfers || name == config.DockComponentSession
++		name == config.DockComponentTransfers || name == config.DockComponentSession || name == config.DockComponentHelp
+ }
+ 
+ // dockCellClickable reports whether a cell records where it was drawn, for a
+-// click: a custom component, which runs its on-click command, and the
+-// copies, which open the Copies panel.
++// click: a custom component, which runs its on-click command, the copies,
++// which open the Copies panel, and the help control, which turns hover help
++// on or off.
+ func dockCellClickable(name string) bool {
+-	return strings.HasPrefix(name, config.DockCustomPrefix) || strings.HasPrefix(name, config.DockPluginPrefix) || name == config.DockComponentTransfers
++	return strings.HasPrefix(name, config.DockCustomPrefix) || strings.HasPrefix(name, config.DockPluginPrefix) ||
++		name == config.DockComponentTransfers || name == config.DockComponentHelp
++}
++
++// dockHelpCell draws the help control, "?". While hover help is on it is lit:
++// on the accent ground, and in reverse video at 16 colours, where there is no
++// ground to give. Off, it is a quiet cell like any other.
++func (m *OS) dockHelpCell() string {
++	pal := m.groundUI()
++	if !m.hoverHelp.on {
++		return renderDockCell("?", config.DockCellStyle{}, pal)
++	}
++	if pal.Depth == overlay.Depth16 {
++		return pal.Mark(renderDockCell("?", config.DockCellStyle{}, pal), overlay.RowState{Cursor: true, Focused: true})
++	}
++	return lipgloss.NewStyle().Background(pal.Accent).Foreground(pal.PillFg).
++		Bold(true).Render(" ? ")
+ }
+ 
+ // dockCustomWidth is the room a side's custom cells want.
+diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
+index 317b1cb59..eb4370653 100644
+--- a/internal/app/hover_help.go
++++ b/internal/app/hover_help.go
+@@ -580,6 +580,12 @@ func (m *OS) helpDockCellComponent(name, parent string, rect image.Rectangle) he
+ 			"clients are attached. Clicking it opens the session switcher."
+ 		c.keys = m.helpKeys("prefix_session_switcher", "prefix_close_session")
+ 		c.cli = []string{"tuios rename-session <name>", "tuios set-session-accent <colour>", "tuios ls"}
++	case name == config.DockComponentHelp:
++		c.title = "Help control"
++		c.purpose = "The ? control. A click turns hover help on or off, and it is lit while " +
++			"hover help is on. It is in no default list; a [dock] list that names \"help\" draws it."
++		c.keys = m.helpKeys(config.ActionToggleHoverHelp)
++		c.cli = []string{"tuios list-dock-components"}
+ 	case name == config.DockComponentButtons:
+ 		c.title = "Buttons"
+ 		c.purpose = "Buttons for the things a person new to tuios looks for first. Each one " +
+diff --git a/internal/config/dock.go b/internal/config/dock.go
+index 33ab119e6..b2ad4e580 100644
+--- a/internal/config/dock.go
++++ b/internal/config/dock.go
+@@ -36,6 +36,10 @@ const (
+ 	// DockComponentButtons is a row of buttons that run actions: New, Split,
+ 	// Close, Help and Settings. It is drawn on the right.
+ 	DockComponentButtons = "buttons"
++	// DockComponentHelp is the "?" control. A click turns hover help on or
++	// off, as Ctrl+b h does, and the cell is lit while hover help is on. It
++	// is in no default list.
++	DockComponentHelp = "help"
+ )
+ 
+ // DockCustomPrefix marks a name in one of the dock lists as referring to a
+@@ -65,6 +69,7 @@ var dockBuiltins = []string{
+ 	DockComponentTransfers,
+ 	DockComponentSession,
+ 	DockComponentButtons,
++	DockComponentHelp,
+ }
+ 
+ // DockBuiltinComponents returns the built-in component names, sorted. Used by
+diff --git a/internal/input/mouse_click.go b/internal/input/mouse_click.go
+index d2fd3f5e5..d41125270 100644
+--- a/internal/input/mouse_click.go
++++ b/internal/input/mouse_click.go
+@@ -240,6 +240,13 @@ func handleMouseClick(msg tea.MouseClickMsg, o *app.OS) (*app.OS, tea.Cmd) {
+ 				}
+ 				return o, nil
+ 			}
++			// The help control turns hover help on or off, as Ctrl+b h does.
++			if name == config.DockComponentHelp {
++				if msg.Button == tea.MouseLeft {
++					o.ToggleHoverHelp()
++				}
++				return o, nil
++			}
+ 			if o.RunDockComponentClick(name, int(msg.Button)) {
+ 				return o, nil
+ 			}
+-- 
+2.56.1
+
