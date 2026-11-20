@@ -1,7 +1,7 @@
-From 0dfbe48643ce22f2fcc774188d5c06e96eec818e Mon Sep 17 00:00:00 2001
+From 3f98fd33fe75d815aa0e5900f89ad10df898c726 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 22:59:18 +0100
-Subject: [PATCH] feat: hover help explains the dock and the desktop
+Subject: [PATCH 2/2] feat: hover help explains the dock and the desktop
 
 Ctrl+b h (toggle_hover_help) turns on hover help, and Ctrl+b h turns it
 off. The explainer is a borderless overlay on the theme's panel ground,

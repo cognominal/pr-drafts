@@ -1,0 +1,106 @@
+From 7d91c76e451da2a8b1da3a5002b10fd8cf25385b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
+Date: Fri, 20 Nov 2026 23:55:03 +0100
+Subject: [PATCH 1/2] chore: raise the binary size ceiling to 50.5 MB
+
+Hover help needs about 170 KB on windows/amd64, the largest target,
+where main has 84,096 bytes of room. Most of it is code that draws and
+walks the explainer and its function table, so it fits only by
+dropping features. docs/perf.md records the raise and the reason.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../PULL_REQUEST_TEMPLATE/pull_request_template.md   |  2 +-
+ AGENTS.md                                            |  2 +-
+ docs/CONTRIBUTING.md                                 |  2 +-
+ docs/perf.md                                         | 12 ++++++++++--
+ scripts/binary-size.sh                               |  4 ++--
+ 5 files changed, 15 insertions(+), 7 deletions(-)
+
+diff --git a/.github/PULL_REQUEST_TEMPLATE/pull_request_template.md b/.github/PULL_REQUEST_TEMPLATE/pull_request_template.md
+index d25eeb6f4..8193c5115 100644
+--- a/.github/PULL_REQUEST_TEMPLATE/pull_request_template.md
++++ b/.github/PULL_REQUEST_TEMPLATE/pull_request_template.md
+@@ -46,7 +46,7 @@ Include steps to test this on different platforms/install methods:
+ 
+ The change in bytes for linux/amd64 and darwin/arm64. Copy it from the
+ binary size comment CI posts, or measure with `scripts/binary-size.sh` on main
+-and on this branch. CI fails only above the 50 MB ceiling.
++and on this branch. CI fails only above the 50.5 MB ceiling.
+ 
+ - linux/amd64: `<+N bytes>`
+ - darwin/arm64: `<+N bytes>`
+diff --git a/AGENTS.md b/AGENTS.md
+index 2a8108acd..b982bf15a 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -171,7 +171,7 @@ does not apply under `-race`.
+ 
+ The binary-size job builds tuios as the release does (`CGO_ENABLED=0`,
+ `-trimpath`, `-ldflags "-s -w"`) for linux/amd64, darwin/arm64 and
+-windows/amd64. It fails when one is over the 50 MB ceiling in
++windows/amd64. It fails when one is over the 50.5 MB ceiling in
+ `scripts/binary-size.sh`, and it comments the size change against main on the pull request. `just size` runs
+ the same check. State the size cost of a change in the pull request body.
+ The room under the ceiling is not a budget to spend: each pull request still
+diff --git a/docs/CONTRIBUTING.md b/docs/CONTRIBUTING.md
+index c85852ee5..f3f248aa2 100644
+--- a/docs/CONTRIBUTING.md
++++ b/docs/CONTRIBUTING.md
+@@ -36,7 +36,7 @@ The `justfile` at the root holds the dev commands. Install [just](https://just.s
+ | `just e2e-flake TEST N` | Runs one end-to-end test N times and counts the failures. |
+ | `just lint` | Runs golangci-lint, `go vet` for each OS, and `internal/lint`. |
+ | `just check --changed` | Runs the check gate on what your branch changed. Run it before you mark a pull request ready. |
+-| `just size` | Builds the release binary and fails above the 50 MB ceiling. |
++| `just size` | Builds the release binary and fails above the 50.5 MB ceiling. |
+ | `just ci` | Runs the local part of CI: format, tidy, lint, unit tests and binary size. |
+ | `just clean` | Stops the throwaway daemons and removes what the recipes built. |
+ 
+diff --git a/docs/perf.md b/docs/perf.md
+index aa9b32681..95f802181 100644
+--- a/docs/perf.md
++++ b/docs/perf.md
+@@ -21,7 +21,7 @@ visible consumer, idle CPU under ~0.5%.
+   ~nothing to the wire (render count bounded). `TUIOS_STATS_FILE` makes the
+   process dump its tick counters on clean exit.
+ - `scripts/binary-size.sh`: builds the stripped release binary for
+-  linux/amd64 and darwin/arm64 and fails over the 50 MB ceiling. See "Binary
++  linux/amd64 and darwin/arm64 and fails over the 50.5 MB ceiling. See "Binary
+   size budget" below.
+ 
+ ## Numbers
+@@ -2362,7 +2362,15 @@ the cuts below brought it under the ceiling.
+ 
+ Since 2026-10-22 the ceiling is the only limit. On 2026-11-02 it went down to
+ 47,000,000 bytes after the rare diagram types moved to the sketch plugin. Since
+-2026-11-04 it is 50,000,000 bytes for each target again. The headroom is not a
++2026-11-04 it is 50,000,000 bytes for each target again. On 2026-11-20 it went
++up to 50,500,000 bytes for hover help (Ctrl+b h), the explainer that says what
++the dock, the rail, a pane or the desktop under the pointer is, with its keys
++and its command lines. On windows/amd64, the largest target, main had 84,096
++bytes of room and the series needs about 170 KB. Its first pull request adds
++107,008 bytes there: about 57 KB of code, mostly drawing and walking the
++explainer, and 35 KB of function table for it. Moving the page text into a
++static table saved nothing, so the series could fit only by dropping features. The new ceiling leaves about 420 KB on
++windows/amd64 after it, about what linux/amd64 had before. The headroom is not a
+ budget to spend: each pull request still reports its size delta and trims what
+ it can. There are no per-target budgets to raise. On a pull request, the job
+ compares each size with main's last measured size. It writes the size, the
+diff --git a/scripts/binary-size.sh b/scripts/binary-size.sh
+index b09121427..f6801c0cc 100755
+--- a/scripts/binary-size.sh
++++ b/scripts/binary-size.sh
+@@ -15,8 +15,8 @@
+ # to that file, for the CI job that compares against main.
+ set -euo pipefail
+ 
+-# 50 MB. Raise it only on purpose, in its own commit, with docs/perf.md.
+-ceiling=50000000
++# 50.5 MB. Raise it only on purpose, in its own commit, with docs/perf.md.
++ceiling=50500000
+ 
+ cd "$(dirname "$0")/.."
+ targets=("$@")
+-- 
+2.56.1
+

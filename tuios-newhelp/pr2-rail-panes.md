@@ -61,7 +61,7 @@ Also checked:
 - `just check --changed`: all checks pass.
 - `go test` on internal/app, internal/config, internal/input and cmd/tuios: pass.
 - `TestIdleCostStaysLow`: pass, with renders=0 at idle.
-- Size against T1 (`just size`): linux/amd64 +24,576 bytes (49,615,008). windows/amd64 +26,112 bytes (50,049,024), still over the ceiling, as T1 is.
+- Size against T1 (`just size`): linux/amd64 +24,576 bytes (49,615,008). windows/amd64 +26,112 bytes (50,049,024), 450,976 under the 50,500,000 ceiling T1 sets.
 
 ## Merge Danger
 

@@ -128,7 +128,7 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 
 | # | Branch | What | Status | Depends on |
 |---|---|---|---|---|
-| T1 | `feat/newhelp-1-engine` | engine, dock and desktop, help keys, KEYBINDINGS.md | tested, unsubmitted; windows/amd64 over the size ceiling | origin/main 4c12ece99 |
+| T1 | `feat/newhelp-1-engine` | engine, dock and desktop, help keys, KEYBINDINGS.md | tested, unsubmitted; raises the size ceiling to 50.5 MB | origin/main 4c12ece99 |
 | T2 | `feat/newhelp-2-rail-panes` | the rail and its sections, a pane's title bar and body | tested, unsubmitted | T1 |
 | T3 | `feat/newhelp-3-leader` | leader menu: explainer hides while it is up, Help entry, footer | not started | T2 |
 | T4 | `feat/newhelp-4-dock-control` | opt-in `?` control on the dock | not started | T3 |
@@ -136,15 +136,15 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 ### T1 Hover help explains the dock and the desktop
 
 - **Status:** tested, unsubmitted
-- **Commit:** 0dfbe4864 on origin/main 4c12ece99
-- **Patch:** `tuios-newhelp/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch`
+- **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then 3f98fd33f, on origin/main 4c12ece99
+- **Patches:** `tuios-newhelp/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`, `tuios-newhelp/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`
 - **PR body:** `tuios-newhelp/pr1-engine.md`
 - **Tested:**
   - 7 e2e tests in `e2e/tui/hover_help_test.go`: pass on the real and sim backends, and all 7 fail on main
   - `just check --changed` green
   - the unit tests of config, input, app and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
-  - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. **Windows is 22,912 B over the 50 MB ceiling** (main has 84,096 B of room), so the binary-size job fails. Needs the maintainer to raise the ceiling in its own commit.
+  - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. Main had 84,096 B of room on Windows, so the first commit raises the ceiling to 50,500,000 B (your decision, 2026-11-20). `just size` passes, with 477,088 B left on windows/amd64.
 - **To submit:**
   1. Push the branch to your fork.
   2. Open the PR against `Gaurav-Gosain/tuios` `main` with `pr1-engine.md`, marked ready only after `just check --changed`.
@@ -153,8 +153,8 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 ### T2 Hover help explains the rail and the panes
 
 - **Status:** tested, unsubmitted
-- **Commit:** 455661fc0 on T1 0dfbe4864
-- **Patch:** `tuios-newhelp/0002-feat-hover-help-explains-the-rail-and-the-panes.patch`
+- **Commit:** 89d458890 on T1 3f98fd33f
+- **Patch:** `tuios-newhelp/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`
 - **PR body:** `tuios-newhelp/pr2-rail-panes.md`
 - **Tested:**
   - 9 hover help e2e tests pass on the real and sim backends
@@ -162,5 +162,5 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - `just check --changed` green
   - the unit tests pass
   - `TestIdleCostStaysLow` passes
-  - size against T1: +24,576 B on linux/amd64, +26,112 B on windows/amd64 (still over the ceiling, as T1 is)
+  - size against T1: +24,576 B on linux/amd64, +26,112 B on windows/amd64, 450,976 B under the new ceiling
 - **To submit:** after T1 is open, push the branch and open the PR with `pr2-rail-panes.md`, replacing `#T1` with T1's number.
