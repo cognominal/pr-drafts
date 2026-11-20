@@ -12,9 +12,9 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 |---|---|---|---|---|---|
 | 1 | MoarVM | PR: close a bound stdin through libuv | 4 × SIGABRT | tested, unsubmitted | none |
 | 2 | roast | PR: regression test for #1 | — | tested, unsubmitted | #1 merged (fails without it) |
-| 3 | NQP | PR: write bytecode files via temp file + rename | 2 × SIGBUS | tested, unsubmitted | none |
+| 3 | NQP | PR: write bytecode files via temp file + rename | 2 × SIGBUS, likely 1 × SIGSEGV | tested, unsubmitted | none |
 | 4 | Rakudo | Issue: closing `Proc.out` early buffers without limit | OOM | written, unsubmitted | none to file; a fix may need a new MoarVM op |
-| 5 | — | SIGSEGV of 20 Nov 04:49 | — | open, not diagnosed | none |
+| 5 | — | SIGSEGV of 20 Nov 04:49 | — | diagnosed: most likely #3 | #3 |
 
 ---
 
@@ -49,7 +49,8 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 - **Tested:**
   - recompiling gives the output a new inode, leaves no temp file, and the output runs
   - NQP `make test`: 150 files, 13746 tests, all pass
-- **Not tested:** a live reproduction of the SIGBUS itself (the diagnosis rests on the two core dumps' fault offsets); Windows `rename` over an existing file.
+- **Reproduced:** recompiling a `.moarvm` file while a process is blocked in one of its subs makes that process fail when it resumes, 3/3 per variant (wrong-type and string-heap errors). With the patched NQP doing the recompile: 3/3 normal exit.
+- **Not tested:** the SIGBUS itself (needs the file to shrink under a mapped page; the diagnosis rests on the two core dumps' fault offsets); Windows `rename` over an existing file.
 - **To submit:** push the branch to your NQP fork, open the PR against `Raku/nqp` `main` with `nqp-pr.md`.
 
 ## roast
@@ -83,9 +84,15 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 ### #5 SIGSEGV of 20 Nov 04:49
 
-- **Status:** open, not diagnosed
-- **What:** a call through a null function pointer in `MVM_interp_run` on the main thread, about 15 minutes after a Rakudo rebuild.
-- **Possibly related to:** #3. A process running from a rebuilt bytecode file could also crash this way, but that's unproven.
+- **Status:** diagnosed, most likely the same cause as #3. No separate fix.
+- **What crashed:** a Rakudo REPL (`rak/install/bin/moar`, no script argument) on the main thread, inside `READ`, called from `IO::Handle.get` → `get-line-slow-path` → `repl-read`: it was waiting for the next line of input.
+- **Proven from the core:**
+  - a dispatch op loaded a null inline-cache entry and called through it (`call *(%rbx)`, rbx = 0)
+  - the interpreter's `cur_op` lies inside `READ`'s bytecode, but its `bytecode_start` points elsewhere, and `cur_op` sits 290 bytes into a 296-byte frame where no dispatch op fits, so the frame metadata and the bytes being run disagree
+  - some frames have names that exist in no current Rakudo source, such as `<Argument 'count' should be greater than zero>`: names read from the wrong place in the string heap
+  - every `blib/*.moarvm` file the process had mapped is marked `(deleted)` or was rewritten after the process started
+- **Inferred:** the REPL sat idle at its prompt while Rakudo was rebuilt in place under it. When input arrived, it resumed on the rebuilt bytes with the old metadata. A reproduction of this pattern (see #3) gives the same kind of corruption: frames running foreign bytecode and garbled string-heap lookups. It didn't produce a SIGSEGV in a few tries, so the link is strong but not demonstrated end to end.
+- **To avoid it now:** quit running REPLs and programs before rebuilding Rakudo, or install to a separate prefix. #3 removes the cause.
 
 ---
 
