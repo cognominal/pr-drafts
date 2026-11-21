@@ -29,4 +29,8 @@ MoarVM mmaps the bytecode files it loads. Rebuilding Rakudo while a program stil
 
 **Blast Radius:** small. Every `--target=mbc --output` compile, including the NQP and Rakudo builds. The output directory must allow creating a file, which it already had to for a first build. A compile that dies part-way leaves a `.tmp-<pid>` file instead of a truncated target.
 
+## Context
+
+Found while investigating MoarVM crashes I hit while working on [rak](https://github.com/cognominal/rak/tree/rak), a shell mode for Raku. The whole investigation, with the related PRs and issue: [pr-drafts](https://github.com/cognominal/pr-drafts#moarvm-crash-investigation-issues-and-prs).
+
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

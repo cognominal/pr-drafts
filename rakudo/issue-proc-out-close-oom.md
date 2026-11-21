@@ -8,7 +8,7 @@ $p.out.get;
 $p.out.close;      # never returns, memory grows until the OOM killer steps in
 ```
 
-`.out.close` waits for the process to exit, but `yes` never exits. In a shell, closing the read end of the pipe would kill `yes` with SIGPIPE. Rakudo keeps the pipe open and keeps reading, and stores every chunk it reads. Memory grows at roughly the speed `yes` writes. On a desktop machine it reached about 45 GB (RAM plus swap) before systemd-oomd killed the whole terminal session, not just the Raku process.
+`.out.close` waits for the process to exit, but `yes` never exits. In a shell, closing the read end of the pipe would kill `yes` with SIGPIPE. Rakudo keeps the pipe open and keeps reading, and stores every chunk it reads. Memory grows at roughly the speed `yes` writes. On a desktop machine with 16 GB of RAM and 32 GB of swap, memory use reached about 45 GB (15.7 GB RAM plus 29.5 GB swap) before systemd-oomd killed the whole terminal session, not just the Raku process.
 
 A producer that does stop shows the same buffering, just with a ceiling. Here the output is read all the way to the end even though nothing will ever read it:
 
@@ -73,3 +73,7 @@ This prints one `y`, returns, and peaks at 166 MB.
 
 - Rakudo 2026.08 (Rakudo Star) on MoarVM 2026.08; same `Proc` code on rakudo main 4b0d5f46f1
 - Linux 7.2, x86_64
+
+## Context
+
+Found while investigating MoarVM crashes I hit while working on [rak](https://github.com/cognominal/rak/tree/rak), a shell mode for Raku. The whole investigation, with the related PRs and issue: [pr-drafts](https://github.com/cognominal/pr-drafts#moarvm-crash-investigation-issues-and-prs).

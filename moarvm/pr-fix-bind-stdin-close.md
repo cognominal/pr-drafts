@@ -43,4 +43,8 @@ my $ = await $pa;
 
 **Blast Radius:** small. Only processes spawned with `stdin_fd_close`, i.e. Rakudo's `bind-stdin` given another process's pipe. A descriptor no libuv handle owns is closed exactly as before.
 
+## Context
+
+Found while investigating MoarVM crashes I hit while working on [rak](https://github.com/cognominal/rak/tree/rak), a shell mode for Raku. The whole investigation, with the related PRs and issue: [pr-drafts](https://github.com/cognominal/pr-drafts#moarvm-crash-investigation-issues-and-prs).
+
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

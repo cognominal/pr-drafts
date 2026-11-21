@@ -28,4 +28,8 @@ This is a regression test for MoarVM PR (Close a bound stdin through libuv). The
 
 **Blast Radius:** tests-only. It fails on Rakudo releases without the MoarVM fix, so merge it after the MoarVM PR.
 
+## Context
+
+Found while investigating MoarVM crashes I hit while working on [rak](https://github.com/cognominal/rak/tree/rak), a shell mode for Raku. The whole investigation, with the related PRs and issue: [pr-drafts](https://github.com/cognominal/pr-drafts#moarvm-crash-investigation-issues-and-prs).
+
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

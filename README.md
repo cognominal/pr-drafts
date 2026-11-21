@@ -4,7 +4,7 @@ Two series: the MoarVM crash investigation (below), and [tuios hover help](#tuio
 
 # MoarVM crash investigation: issues and PRs
 
-Status as of 2026-11-20. **Nothing has been pushed, submitted or posted.**
+Status as of 2026-11-21. **Nothing has been pushed, submitted or posted.** #1, #3 and #4 are ready to go: each body links back here and to rak.
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
@@ -85,7 +85,7 @@ None is submitted yet. Details per repo below.
   - peak memory measured on Rakudo Star 2026.08: 0.8 GB for 300 MB of discarded output, 1.4 GB for 1 GB
   - an attempted Rakudo-only fix (discard output after close) only slowed the growth, so it was dropped
   - the workaround in the draft (kill the process instead of closing `.out`) was run: one line printed, returns, 166 MB peak
-- **Check before posting:** the "about 45 GB" figure for the original OOM comes from the earlier diagnosis and wasn't re-measured.
+- **Checked:** the "about 45 GB" figure matches the systemd-oomd log of 20 Nov 16:49: 15.7 GB RAM plus 29.5 GB swap in use, machine-wide.
 - **To submit:** open an issue on `rakudo/rakudo` with the draft as its body.
 
 ## Not attributed to a repo
