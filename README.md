@@ -1,6 +1,6 @@
-# Upstream issues and PRs
+# Issues and PRs
 
-Two series: the MoarVM crash investigation (below), and [tuios hover help](#tuios-hover-help-newhelp) (at the end).
+Upstream PRs and issues, and issues in my own repos. Three series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), and [rak: irak feedback](#rak-irak-feedback-before-submission) (at the end).
 
 # MoarVM crash investigation: issues and PRs
 
@@ -115,6 +115,7 @@ One folder per upstream repo. Each holds the `git format-patch` files of its PRs
 | [`roast/`](roast/) | Raku/roast | #2 | `c931c668` |
 | [`rakudo/`](rakudo/) | rakudo/rakudo | #4 | `c931c668` |
 | [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
+| [`rak/`](rak/) | cognominal/rak | R1 | `c931c668` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
@@ -207,3 +208,23 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - `TestIdleCostStaysLow` passes
   - size at the head: 49,619,104 B linux/amd64, 50,053,120 B windows/amd64 (446,880 B under the ceiling)
 - **To submit:** after T3 is open, push the branch and open the PR with `tuios/pr4-dock-control.md`, replacing `#T3`.
+
+---
+
+# rak: irak feedback before submission
+
+**Trigger:** a feature request of mine for irak, the interactive rak: before running a submission, insert `my` before undeclared variables and color each word by what it denotes; a second Enter within a second runs it.
+
+**Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27` (the MoarVM session, see above).
+
+| # | Repo | Kind | Topic | Status |
+|---|---|---|---|---|
+| R1 | rak | [issue](https://github.com/cognominal/rak/issues/1) | irak feedback | filed |
+
+### R1 [RFE] in irak add feedback before submission
+
+- **Status:** filed 2026-11-21 as [cognominal/rak#1](https://github.com/cognominal/rak/issues/1), label `enhancement`. The first issue of the repo: issues were enabled for it.
+- **Body:** [`rak/issue-irak-feedback.md`](rak/issue-irak-feedback.md), also kept in the rak repo as `.scratch/irak/issues/01-feedback-before-submission.md` on branch `rak` (not committed yet).
+- **Contents:** the proposed behavior (where `my` goes, typos left alone, the one-second window) and an implementation in three parts: analysis by compiling without running, an `&on-finish` hook to propose upstream to Terminal::LineEditor, and coloring through a subclass of its input field.
+- **Open point:** compiling for the analysis runs `BEGIN` and `use` once more.
+- **Next:** if the Terminal::LineEditor hook is chosen, it becomes an upstream PR tracked here.
