@@ -10,7 +10,7 @@ Status as of 2026-11-21. #1, #3 and #4 are submitted; #2 waits for #1 to be merg
 
 **Trigger:** MoarVM kept crashing on this machine while I worked on rak, and one run took down my whole terminal session. I asked Claude to investigate the core dumps (4 × SIGABRT, 2 × SIGBUS, 1 × SIGSEGV) and the out-of-memory kill, reproduce each with a minimal program, and fix them against the upstream repos. Each cause sat in a different layer, so the fixes span MoarVM, NQP, roast and Rakudo.
 
-Status values: **tested** (fix written and verified locally) · **unsubmitted** · **submitted** · **accepted** · **open** (no fix yet)
+Status values: **WIP** (work in progress) · **tested** (fix written and verified locally) · **unsubmitted** · **submitted** · **accepted** · **open** (no fix yet)
 
 ## Overview
 
@@ -223,7 +223,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 
 | # | Repo | Kind | Topic | Status |
 |---|---|---|---|---|
-| R1 | rak | [issue](https://github.com/cognominal/rak/issues/1) | irak feedback | filed |
+| R1 | rak | [issue](https://github.com/cognominal/rak/issues/1) | irak feedback | WIP |
 | R2 | LineEditor | PR | on-finish | tested |
 
 ### R1 [RFE] in irak add feedback before submission
@@ -233,9 +233,12 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 - **Contents:** the proposed behavior (where `my` goes, typos left alone, the one-second window) and an implementation in three parts: analysis by compiling without running, an `&on-finish` hook to propose upstream to Terminal::LineEditor, and coloring through a subclass of its input field.
 - **Open point:** compiling for the analysis runs `BEGIN` and `use` once more.
 - **Work:** being implemented by Claude in the tuios session `cognominal-rak-irak-feedback`, branch `irak-feedback` from `rak`, worktree `~/.local/share/tuios/worktrees/cognominal---rak/irak-feedback`. It is built against the latest NQP `main` (5397dd7da) and the MoarVM it pins, newer than the NQP_REVISION of `rak`.
-- **Implementation:** done and tested in that worktree, not committed yet. The first Enter inserts `my` and colors the line, a second Enter within a second runs it; `NO_COLOR` turns the colors off. Tested in a pty with `./rak`, with `t/02-rakudo/rak/022-irak-feedback.t` (24 tests), `t/02-rakudo/repl.t` and `make rak-test`. Documented in `CHEATSHEET.md` and the three irak tutorials.
+- **Status:** WIP. Pushed to branch [`irak-feedback`](https://github.com/cognominal/rak/tree/irak-feedback) of cognominal/rak: 6cd8eb21d8 (the feature) and 01a1a6dc23 (tracks the Terminal::LineEditor patch).
+- **Works:** the first Enter colors each word; a second Enter within a second runs the line; `NO_COLOR` turns the colors off. Documented in `CHEATSHEET.md` and the three irak tutorials. `t/02-rakudo/rak/022-irak-feedback.t` (24 tests), `t/02-rakudo/repl.t` and `make rak-test` pass.
+- **Does not work yet:** the insertion of `my` does not show up in the live REPL, although the analysis tests pass. The colors are lost as soon as the line is edited.
+- **Comment:** posted 2026-11-21 as [issuecomment-7068783661](https://github.com/cognominal/rak/issues/1#issuecomment-7068783661); text in [`rak/comment-irak-feedback-wip.md`](rak/comment-irak-feedback-wip.md).
 - **Depends on:** R2. Until it is merged, the rak build applies R2 as `tools/build/rak-line-editor-patches/Terminal-LineEditor-0.0.23.patch` to the pinned Terminal::LineEditor 0.0.23.
-- **Next:** commit on `irak-feedback`, merge into `rak`, close R1.
+- **Next:** make the `my` insertion work in the live REPL, keep the colors while editing, then merge into `rak` and close R1.
 
 ### R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries
 
