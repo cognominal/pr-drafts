@@ -1,4 +1,4 @@
-From db0f5a3d530204e2f053f9d7ada6e385c312f8ff Mon Sep 17 00:00:00 2001
+From 50cbf514347cc3751fbbb6ea1c55dfa9e12ff5a1 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 23:30:21 +0100
 Subject: [PATCH 3/5] feat: hover help explains the rail and the panes
@@ -14,17 +14,25 @@ and the panes sit between the dock and the desktop.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- e2e/tui/hover_help_test.go       |  98 +++++++++-
- internal/app/hover_help.go       |   2 +
+ e2e/tui/hover_help_test.go       | 125 ++++++++++++-
+ internal/app/hover_help.go       |  43 ++++-
  internal/app/hover_help_parts.go | 301 +++++++++++++++++++++++++++++++
- 3 files changed, 391 insertions(+), 10 deletions(-)
+ 3 files changed, 452 insertions(+), 17 deletions(-)
  create mode 100644 internal/app/hover_help_parts.go
 
 diff --git a/e2e/tui/hover_help_test.go b/e2e/tui/hover_help_test.go
-index 72481d5a5..130052b56 100644
+index 72481d5a5..9c7c0c9db 100644
 --- a/e2e/tui/hover_help_test.go
 +++ b/e2e/tui/hover_help_test.go
-@@ -25,8 +25,14 @@ import (
+@@ -1,6 +1,7 @@
+ package tuie2e
+ 
+ import (
++	"slices"
+ 	"strings"
+ 	"testing"
+ 
+@@ -25,8 +26,14 @@ import (
  //     screen that makes one, and the dock's counter names workspace 2 only
  //     once it exists.
  //
@@ -40,7 +48,7 @@ index 72481d5a5..130052b56 100644
  
  // The help keys as xterm sends them: CSI 1 ; 2 for shift, ESC before a
  // character for alt.
-@@ -93,20 +99,20 @@ func TestHoverHelpExplainsTheDockCellUnderThePointer(t *testing.T) {
+@@ -93,20 +100,20 @@ func TestHoverHelpExplainsTheDockCellUnderThePointer(t *testing.T) {
  	saveArtifact(t, term, dir, "mode-pill")
  }
  
@@ -67,7 +75,7 @@ index 72481d5a5..130052b56 100644
  
  	sendKeys(t, term, hhShiftDown)
  	waitText(t, term, "shift+down goes into the dock", "Dock › ")
-@@ -136,7 +142,7 @@ func TestHoverHelpLeavesTypingToThePane(t *testing.T) {
+@@ -136,7 +143,7 @@ func TestHoverHelpLeavesTypingToThePane(t *testing.T) {
  }
  
  // TestHoverHelpPassesPlainKeysThrough runs cat -v in the pane with hover help
@@ -76,7 +84,7 @@ index 72481d5a5..130052b56 100644
  // keys, and none of the help keys, which walk the explainer instead.
  func TestHoverHelpPassesPlainKeysThrough(t *testing.T) {
  	term, dir := hoverHelpStart(t, "")
-@@ -145,8 +151,8 @@ func TestHoverHelpPassesPlainKeysThrough(t *testing.T) {
+@@ -145,8 +152,8 @@ func TestHoverHelpPassesPlainKeysThrough(t *testing.T) {
  	toggleHoverHelp(t, term)
  	waitText(t, term, "the explainer opens on the dock", "Dock (", hhClose)
  
@@ -87,7 +95,7 @@ index 72481d5a5..130052b56 100644
  	sendKeys(t, term, tuitest.Enter)
  	// cat -v writes the line back after enter, so the line is on screen twice
  	// once the pane had it: the terminal's echo and cat's copy.
-@@ -208,3 +214,75 @@ func TestHoverHelpLetsClicksThrough(t *testing.T) {
+@@ -208,3 +215,101 @@ func TestHoverHelpLetsClicksThrough(t *testing.T) {
  	waitText(t, term, "the explainer after the click", hhClose)
  	saveArtifact(t, term, dir, "clicked")
  }
@@ -144,6 +152,7 @@ index 72481d5a5..130052b56 100644
 +	sendKeys(t, term, hhShiftDown)
 +	waitText(t, term, "shift+down goes on to the next section", "Rail › Terminals")
 +	saveArtifact(t, term, dir, "2-terminals")
++	hhRightOfRail(t, term, "Rail › Terminals")
 +	sendKeys(t, term, hhShiftUp, hhShiftUp)
 +	waitText(t, term, "shift+up twice comes out to the rail", "Rail (")
 +
@@ -162,9 +171,34 @@ index 72481d5a5..130052b56 100644
 +	mouseHover(t, term, 3, row)
 +	waitText(t, term, "hovering the rail's sessions header", "Rail › Sessions")
 +	saveArtifact(t, term, dir, "3-hover")
++	hhRightOfRail(t, term, "Rail › Sessions")
++}
++
++// hhRightOfRail fails unless the explainer's line that names title starts
++// right of the rail's edge, the │ on the sessions header's row: below a
++// section is the rest of the rail, and the explainer must not cover it.
++func hhRightOfRail(t *testing.T, term *tuitest.Terminal, title string) {
++	t.Helper()
++	edge, at := -1, -1
++	for _, line := range strings.Split(term.Screen().Text(), "\n") {
++		runes := []rune(line)
++		if edge < 0 && strings.HasPrefix(strings.TrimSpace(line), "sessions") {
++			edge = slices.Index(runes, '│')
++		}
++		if i := strings.Index(line, title); i >= 0 && at < 0 {
++			at = len([]rune(line[:i]))
++		}
++	}
++	if edge < 0 || at < 0 {
++		t.Fatalf("no rail edge (%d) or no %q (%d) on screen\n%s", edge, title, at, term.Snapshot())
++	}
++	if at <= edge {
++		t.Fatalf("ASSERTION: the explainer for %q starts at column %d, over the rail, whose edge is column %d\n%s",
++			title, at, edge, term.Snapshot())
++	}
 +}
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index f21c8a1ed..3137c0564 100644
+index f21c8a1ed..af8842c53 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
 @@ -372,6 +372,8 @@ func helpCap(keys []helpKey, n int) []helpKey {
@@ -176,6 +210,73 @@ index f21c8a1ed..3137c0564 100644
  	comps = append(comps, m.helpDesktopComponent())
  	return comps
  }
+@@ -734,7 +736,13 @@ func (m *OS) renderHoverHelp() *lipgloss.Layer {
+ 	if pal.Depth == overlay.Depth16 {
+ 		gap = 1
+ 	}
+-	x, y := m.placeExplainer(cur.rect, boxW, boxH, gap)
++	// A part's explainer keeps off the whole component when it can: below a
++	// rail section is the rest of the rail.
++	var keepOff image.Rectangle
++	if parent := helpComponentByID(comps, cur.parent); parent != nil {
++		keepOff = parent.rect
++	}
++	x, y := m.placeExplainer(cur.rect, keepOff, boxW, boxH, gap)
+ 	h.rect = image.Rect(x, y, x+boxW, y+boxH)
+ 	return lipgloss.NewLayer(box).X(x).Y(y).Z(config.ZIndexWhichKey + 1).ID(helpLayerID)
+ }
+@@ -936,10 +944,12 @@ func (m *OS) helpFooterLines(comps []helpComponent, cur *helpComponent, inner in
+ }
+ 
+ // placeExplainer puts the explainer below its target, then above it, then
+-// beside it, gap cells away. Only when none of those fits does it clamp into
+-// the screen, the one case where it covers what it explains. It keeps off the
++// beside it, gap cells away. It first looks for a place that also keeps off
++// keepOff, the component a part belongs to, and only then for one that keeps
++// off the target alone. Only when none of those fits does it clamp into the
++// screen, the one case where it covers what it explains. It keeps off the
+ // dock unless the target is on the dock.
+-func (m *OS) placeExplainer(anchor image.Rectangle, w, h, gap int) (int, int) {
++func (m *OS) placeExplainer(anchor, keepOff image.Rectangle, w, h, gap int) (int, int) {
+ 	screenW, screenH := m.GetRenderWidth(), m.GetRenderHeight()
+ 	clamp := func(x, y int) (int, int) {
+ 		return min(max(x, 0), max(screenW-w, 0)), min(max(y, 0), max(screenH-h, 0))
+@@ -958,13 +968,32 @@ func (m *OS) placeExplainer(anchor image.Rectangle, w, h, gap int) (int, int) {
+ 		return dock.Empty() || anchor.Overlaps(dock) || !r.Overlaps(dock)
+ 	}
+ 	cx := min(max(anchor.Min.X+(anchor.Dx()-w)/2, 0), max(screenW-w, 0))
+-	cy := anchor.Min.Y + (anchor.Dy()-h)/2
+-	for _, p := range []image.Point{
++	// Beside the target, the explainer is centred on it but stays within the
++	// rows it may use, so a short target such as a rail section still has a
++	// place beside it.
++	top, bottom := 0, screenH
++	if !dock.Empty() && !anchor.Overlaps(dock) {
++		if dock.Min.Y <= 0 {
++			top = dock.Max.Y
++		} else {
++			bottom = dock.Min.Y
++		}
++	}
++	cy := min(max(anchor.Min.Y+(anchor.Dy()-h)/2, top), max(bottom-h, top))
++	spots := []image.Point{
+ 		{X: cx, Y: anchor.Max.Y + gap},
+ 		{X: cx, Y: anchor.Min.Y - h - gap},
+ 		{X: anchor.Max.X + gap, Y: cy},
+ 		{X: anchor.Min.X - w - gap, Y: cy},
+-	} {
++	}
++	if !keepOff.Empty() {
++		for _, p := range spots {
++			if fits(p) && !image.Rect(p.X, p.Y, p.X+w, p.Y+h).Overlaps(keepOff) {
++				return p.X, p.Y
++			}
++		}
++	}
++	for _, p := range spots {
+ 		if fits(p) {
+ 			return p.X, p.Y
+ 		}
 diff --git a/internal/app/hover_help_parts.go b/internal/app/hover_help_parts.go
 new file mode 100644
 index 000000000..77473dcc4

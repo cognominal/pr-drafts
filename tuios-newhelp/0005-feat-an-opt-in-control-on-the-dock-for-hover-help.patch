@@ -1,4 +1,4 @@
-From f2d94efd17e38fcbb555ef163a1c8d5ac8996b23 Mon Sep 17 00:00:00 2001
+From 13f751c95d10e97f25958c20e6943f2ad5b2e683 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Sat, 21 Nov 2026 00:54:39 +0100
 Subject: [PATCH 5/5] feat: an opt-in ? control on the dock for hover help
@@ -146,10 +146,10 @@ index 9ab7359c6..64bccc57d 100644
      },
      {
 diff --git a/e2e/tui/hover_help_test.go b/e2e/tui/hover_help_test.go
-index 051776f90..3ad4fa0ce 100644
+index 14838d3a9..8becc521e 100644
 --- a/e2e/tui/hover_help_test.go
 +++ b/e2e/tui/hover_help_test.go
-@@ -32,6 +32,11 @@ import (
+@@ -33,6 +33,11 @@ import (
  //     find the dock's page. The pointer goes to the mode pill, whose page is
  //     "Dock › Mode", and the test waits for "Dock (" with no "Dock › Mode".
  //
@@ -161,7 +161,7 @@ index 051776f90..3ad4fa0ce 100644
  //   - A page could be reached by the walk while the pointer finds nothing. The
  //     pane and rail tests hover a cell first and wait for that part's own page
  //     by its path, then walk.
-@@ -42,7 +47,8 @@ import (
+@@ -43,7 +48,8 @@ import (
  // and the rail test at the rail's. On a build without the leader menu's
  // stand-aside, the leader test fails waiting for the explainer to go, and on
  // one that hides the explainer but lets the pointer retarget under the menu,
@@ -171,7 +171,7 @@ index 051776f90..3ad4fa0ce 100644
  
  // The help keys as xterm sends them: CSI 1 ; 2 for shift, ESC before a
  // character for alt.
-@@ -321,3 +327,51 @@ func TestHoverHelpStandsAsideForTheLeaderMenu(t *testing.T) {
+@@ -348,3 +354,51 @@ func TestHoverHelpStandsAsideForTheLeaderMenu(t *testing.T) {
  	}
  	saveArtifact(t, term, dir, "2-back")
  }
@@ -274,7 +274,7 @@ index 131abf870..a88885986 100644
  
  // dockCustomWidth is the room a side's custom cells want.
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index 317b1cb59..eb4370653 100644
+index c0d84eb32..cf242f2c2 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
 @@ -580,6 +580,12 @@ func (m *OS) helpDockCellComponent(name, parent string, rect image.Rectangle) he

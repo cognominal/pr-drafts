@@ -19,6 +19,7 @@ Hover help now explains the rail and the panes. Each is a **component**, and its
 - A section's key list holds the keys that act while the rail has the keyboard (Ctrl+b e), with the rail's own descriptions.
 - A hidden rail keeps a page with no rectangle, so shift+→ still reaches it and the page names Ctrl+b b.
 - A pane's rectangles follow the pane's own geometry, its title position (top, bottom or hidden) and the cropped session view.
+- A part's explainer first looks for a place that keeps off the whole component, then one that keeps off the part alone. Beside a short target it is clamped into the rows it may use, so a rail section's explainer goes beside the rail instead of over the rest of it.
 - The CLI lines only name commands that exist: `focus-window`, `set-window --name`, `capture-pane -w`, `split-window`, `set-layout`, `close-window`. A pane name is shell-quoted.
 
 New file: `internal/app/hover_help_parts.go`.
@@ -38,6 +39,7 @@ New file: `internal/app/hover_help_parts.go`.
   rail test:  shift+→ from the dock → "Rail (…)"
               shift+↓ shift+↓ → "Rail › Sessions", "Rail › Terminals", shift+↑ ×2 → "Rail ("
               hover the sessions header → "Rail › Sessions"
+              each section's explainer starts right of the rail's edge
   ```
   Each step saves its frame, plain and styled, under `artifactDir`.
 
@@ -61,7 +63,7 @@ Also checked:
 - `just check --changed`: all checks pass.
 - `go test` on internal/app, internal/config, internal/input and cmd/tuios: pass.
 - `TestIdleCostStaysLow`: pass, with renders=0 at idle.
-- Size against T1 (`just size`): linux/amd64 +24,576 bytes (49,615,008). windows/amd64 +26,112 bytes (50,049,024), 450,976 under the 50,500,000 ceiling T1 sets.
+- Size against T1 (`just size`): linux/amd64 +24,576 bytes (49,615,008). windows/amd64 +27,648 bytes (50,050,560), 449,440 under the 50,500,000 ceiling T1 sets.
 
 ## Merge Danger
 

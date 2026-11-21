@@ -52,7 +52,7 @@ Also checked:
 - `just check --changed`: all checks pass.
 - The unit tests of config, app, input and cmd/tuios pass.
 - `TestIdleCostStaysLow`: pass.
-- Size against T3: linux/amd64 +0 bytes, darwin/arm64 +16,512 bytes, windows/amd64 +2,560 bytes (50,051,584, 448,416 under the 50,500,000 ceiling).
+- Size at the head of the stack: linux/amd64 49,619,104 bytes, darwin/arm64 46,220,946, windows/amd64 50,053,120 (446,880 under the 50,500,000 ceiling).
 
 ## Merge Danger
 

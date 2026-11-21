@@ -153,7 +153,7 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 ### T2 Hover help explains the rail and the panes
 
 - **Status:** tested, unsubmitted
-- **Commit:** db0f5a3d5 on T1 ee501bdbe
+- **Commit:** 50cbf5143 on T1 ee501bdbe
 - **Patch:** `tuios-newhelp/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`
 - **PR body:** `tuios-newhelp/pr2-rail-panes.md`
 - **Tested:**
@@ -162,13 +162,14 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - `just check --changed` green
   - the unit tests pass
   - `TestIdleCostStaysLow` passes
-  - size against T1: +24,576 B on linux/amd64, +26,112 B on windows/amd64, 450,976 B under the new ceiling
+  - size against T1: +24,576 B on linux/amd64, +27,648 B on windows/amd64, 449,440 B under the new ceiling
+  - 2026-11-21: fixed after your manual test. A rail section's explainer covered the rest of the rail; it now goes beside the rail. The rail test checks it, and fails on the old build
 - **To submit:** after T1 is open, push the branch and open the PR with `pr2-rail-panes.md`, replacing `#T1` with T1's number.
 
 ### T3 Hover help stands aside for the leader menu
 
 - **Status:** tested, unsubmitted
-- **Commit:** 393091fff on T2 db0f5a3d5
+- **Commit:** 5dfbf0ef8 on T2 50cbf5143
 - **Patch:** `tuios-newhelp/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch`
 - **PR body:** `tuios-newhelp/pr3-leader.md`
 - **Tested:**
@@ -182,7 +183,7 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 ### T4 An opt-in ? control on the dock
 
 - **Status:** tested, unsubmitted
-- **Commit:** f2d94efd1 on T3 393091fff
+- **Commit:** 13f751c95 on T3 5dfbf0ef8
 - **Patch:** `tuios-newhelp/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`
 - **PR body:** `tuios-newhelp/pr4-dock-control.md`
 - **Tested:**
@@ -191,5 +192,5 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - `just check --changed` green
   - the unit tests of config, app, input and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
-  - size against T3: +0 B linux/amd64, +16,512 B darwin/arm64, +2,560 B windows/amd64 (448,416 B under the ceiling)
+  - size at the head: 49,619,104 B linux/amd64, 50,053,120 B windows/amd64 (446,880 B under the ceiling)
 - **To submit:** after T3 is open, push the branch and open the PR with `pr4-dock-control.md`, replacing `#T3`.
