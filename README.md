@@ -4,7 +4,7 @@ Two series: the MoarVM crash investigation (below), and [tuios hover help](#tuio
 
 # MoarVM crash investigation: issues and PRs
 
-Status as of 2026-11-21. #1 is submitted; #3 and #4 are ready to go. Each body links back here and to rak.
+Status as of 2026-11-21. #1 and #3 are submitted; #4 is ready to go. Each body links back here and to rak.
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
@@ -18,11 +18,11 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 |---|---|---|---|---|---|
 | 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | submitted | — |
 | 2 | roast | PR | test for #1 | tested | #1 merged |
-| 3 | NQP | PR | 2 × SIGBUS, SIGSEGV | tested | — |
+| 3 | NQP | [PR](https://github.com/Raku/nqp/pull/882) | 2 × SIGBUS, SIGSEGV | submitted | — |
 | 4 | Rakudo | issue | OOM | written | — |
 | 5 | — | crash | SIGSEGV | diagnosed | fixed by #3 |
 
-Only #1 is submitted so far. Details per repo below.
+#1 and #3 are submitted. Details per repo below.
 
 ---
 
@@ -48,8 +48,8 @@ Only #1 is submitted so far. Details per repo below.
 
 ### #3 Write bytecode files to a temporary file and rename it into place
 
-- **Status:** tested, unsubmitted
-- **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp)
+- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882), awaiting review
+- **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp), pushed to `cognominal/nqp`
 - **Patch:** [`nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`](nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch)
 - **PR body:** [`nqp/pr-atomic-mbc-write.md`](nqp/pr-atomic-mbc-write.md)
 - **Depends on:** nothing
@@ -59,7 +59,7 @@ Only #1 is submitted so far. Details per repo below.
   - NQP `make test`: 150 files, 13746 tests, all pass
 - **Reproduced:** recompiling a `.moarvm` file while a process is blocked in one of its subs makes that process fail when it resumes, 3/3 per variant (wrong-type and string-heap errors). With the patched NQP doing the recompile: 3/3 normal exit.
 - **Not tested:** the SIGBUS itself (needs the file to shrink under a mapped page; the diagnosis rests on the two core dumps' fault offsets); Windows `rename` over an existing file.
-- **To submit:** push the branch to your NQP fork, open the PR against `Raku/nqp` `main` with `nqp/pr-atomic-mbc-write.md`.
+- **Next:** answer review comments on #882.
 
 ## roast
 
@@ -92,7 +92,7 @@ Only #1 is submitted so far. Details per repo below.
 
 ### #5 SIGSEGV of 20 Nov 04:49
 
-- **Status:** diagnosed, most likely the same cause as #3. No separate fix.
+- **Status:** diagnosed, most likely the same cause as #3 ([Raku/nqp#882](https://github.com/Raku/nqp/pull/882)). No separate fix.
 - **What crashed:** a Rakudo REPL (`rak/install/bin/moar`, no script argument) on the main thread, inside `READ`, called from `IO::Handle.get` → `get-line-slow-path` → `repl-read`: it was waiting for the next line of input.
 - **Proven from the core:**
   - a dispatch op loaded a null inline-cache entry and called through it (`call *(%rbx)`, rbx = 0)
@@ -120,7 +120,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 ## Suggested order
 
-1. ~~Submit #1 (MoarVM)~~ done: #2087. Submit #3 (NQP); it is independent.
+1. ~~Submit #1 (MoarVM) and #3 (NQP)~~ done: MoarVM#2087, nqp#882.
 2. File #4 (Rakudo issue).
 3. Submit #2 (roast) once #1 is merged.
 4. Update the status column here as each one is submitted and accepted.
