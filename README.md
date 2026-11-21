@@ -66,12 +66,12 @@ None is submitted yet. Details per repo below.
 ### #2 Test tapping a stdout after the process bound to it exited
 
 - **Status:** tested, unsubmitted
-- **Branch:** `bind-stdin-tap-after-exit` in a **shallow clone in the Claude scratchpad**, which may be cleared. Commit a5df4d5 on Raku/roast 7639d08. The durable copy is the patch here.
+- **Branch:** `bind-stdin-tap-after-exit` in `~/git/cognominal---roast`, 1 commit (1e6f0c19e) on `upstream/master` 7639d08 (Raku/roast)
 - **Patch:** [`roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch`](roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch)
 - **PR body:** [`roast/pr-bind-stdin-tap-after-exit.md`](roast/pr-bind-stdin-tap-after-exit.md)
 - **Depends on:** #1 merged and in a Rakudo release. Otherwise the test fails, as it does on Rakudo Star 2026.08.
 - **What:** adds test 18 to `S17-procasync/bind-handles.t`. It runs in a subprocess, so an abort fails one test instead of killing the file.
-- **To submit:** clone Raku/roast (or your fork), `git am` the patch, push, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, referencing the MoarVM PR. Submit after #1.
+- **To submit:** push the branch to your roast fork, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, referencing the MoarVM PR. Submit after #1.
 
 ## Rakudo
 
