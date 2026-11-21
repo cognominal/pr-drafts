@@ -227,4 +227,5 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 - **Body:** [`rak/issue-irak-feedback.md`](rak/issue-irak-feedback.md), also kept in the rak repo as `.scratch/irak/issues/01-feedback-before-submission.md` on branch `rak` (not committed yet).
 - **Contents:** the proposed behavior (where `my` goes, typos left alone, the one-second window) and an implementation in three parts: analysis by compiling without running, an `&on-finish` hook to propose upstream to Terminal::LineEditor, and coloring through a subclass of its input field.
 - **Open point:** compiling for the analysis runs `BEGIN` and `use` once more.
+- **Work:** being implemented by Claude in the tuios session `cognominal-rak-irak-feedback`, branch `irak-feedback` from `rak`, worktree `~/.local/share/tuios/worktrees/cognominal---rak/irak-feedback`. It is built against the latest NQP `main` (5397dd7da) and the MoarVM it pins, newer than the NQP_REVISION of `rak`.
 - **Next:** if the Terminal::LineEditor hook is chosen, it becomes an upstream PR tracked here.
