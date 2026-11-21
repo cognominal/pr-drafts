@@ -4,7 +4,7 @@ Two series: the MoarVM crash investigation (below), and [tuios hover help](#tuio
 
 # MoarVM crash investigation: issues and PRs
 
-Status as of 2026-11-21. #1 and #3 are submitted; #4 is ready to go. Each body links back here and to rak.
+Status as of 2026-11-21. #1, #3 and #4 are submitted; #2 waits for #1 to be merged. Each body links back here and to rak.
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
@@ -19,10 +19,10 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 | 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | submitted | — |
 | 2 | roast | PR | test for #1 | tested | #1 merged |
 | 3 | NQP | [PR](https://github.com/Raku/nqp/pull/882) | 2 × SIGBUS, SIGSEGV | submitted | — |
-| 4 | Rakudo | issue | OOM | written | — |
+| 4 | Rakudo | [issue](https://github.com/rakudo/rakudo/issues/6951) | OOM | filed | — |
 | 5 | — | crash | SIGSEGV | diagnosed | fixed by #3 |
 
-#1 and #3 are submitted. Details per repo below.
+#1, #3 and #4 are submitted. Details per repo below.
 
 ---
 
@@ -77,7 +77,7 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 ### #4 Issue: closing a Proc's `.out` early buffers the rest of the output without limit
 
-- **Status:** issue written, unsubmitted. No PR: the fix needs a design decision first.
+- **Status:** filed 2026-11-21 as [rakudo/rakudo#6951](https://github.com/rakudo/rakudo/issues/6951). No PR: the fix needs a design decision first.
 - **Draft:** [`rakudo/issue-proc-out-close-oom.md`](rakudo/issue-proc-out-close-oom.md)
 - **Depends on:** nothing to file it. The likely fix (close the read end so the producer gets SIGPIPE) would need a new MoarVM operation to close one output pipe of a running process: a follow-up MoarVM PR that doesn't exist yet.
 - **What:** `run 'yes', :out` then `.out.close` never returns and memory grows until the OOM killer steps in. Output piles up in MoarVM's read queue (Rakudo grants unlimited read permits) and in `Proc`'s `Channel`.
@@ -86,7 +86,7 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
   - an attempted Rakudo-only fix (discard output after close) only slowed the growth, so it was dropped
   - the workaround in the draft (kill the process instead of closing `.out`) was run: one line printed, returns, 166 MB peak
 - **Checked:** the "about 45 GB" figure matches the systemd-oomd log of 20 Nov 16:49: 15.7 GB RAM plus 29.5 GB swap in use, machine-wide.
-- **To submit:** open an issue on `rakudo/rakudo` with the draft as its body.
+- **Next:** follow the discussion on #6951; if option B is chosen, it needs a MoarVM PR for an op that closes one output pipe of a running process.
 
 ## Not attributed to a repo
 
@@ -121,7 +121,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 ## Suggested order
 
 1. ~~Submit #1 (MoarVM) and #3 (NQP)~~ done: MoarVM#2087, nqp#882.
-2. File #4 (Rakudo issue).
+2. ~~File #4 (Rakudo issue)~~ done: rakudo#6951.
 3. Submit #2 (roast) once #1 is merged.
 4. Update the status column here as each one is submitted and accepted.
 
