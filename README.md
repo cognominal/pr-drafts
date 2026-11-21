@@ -14,13 +14,15 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 ## Overview
 
-| # | Repo | What | Fixes | Status | Depends on |
+| # | Repo | Kind | Fixes | Status | Needs |
 |---|---|---|---|---|---|
-| 1 | MoarVM | PR: close a bound stdin through libuv | 4 × SIGABRT | tested, unsubmitted | none |
-| 2 | roast | PR: regression test for #1 | — | tested, unsubmitted | #1 merged (fails without it) |
-| 3 | NQP | PR: write bytecode files via temp file + rename | 2 × SIGBUS, likely 1 × SIGSEGV | tested, unsubmitted | none |
-| 4 | Rakudo | Issue: closing `Proc.out` early buffers without limit | OOM | written, unsubmitted | none to file; a fix may need a new MoarVM op |
-| 5 | — | SIGSEGV of 20 Nov 04:49 | — | diagnosed: most likely #3 | #3 |
+| 1 | MoarVM | PR | 4 × SIGABRT | tested | — |
+| 2 | roast | PR | test for #1 | tested | #1 merged |
+| 3 | NQP | PR | 2 × SIGBUS, SIGSEGV | tested | — |
+| 4 | Rakudo | issue | OOM | written | — |
+| 5 | — | crash | SIGSEGV | diagnosed | fixed by #3 |
+
+None is submitted yet. Details per repo below.
 
 ---
 
@@ -106,13 +108,13 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 One folder per upstream repo. Each holds the `git format-patch` files of its PRs and the PR or issue bodies to paste.
 
-| Folder | Upstream | Contents | Claude session |
+| Folder | Upstream | Items | Session |
 |---|---|---|---|
-| [`moarvm/`](moarvm/) | MoarVM/MoarVM | #1 patch and PR body | `c931c668` |
-| [`nqp/`](nqp/) | Raku/nqp | #3 patch and PR body | `c931c668` |
-| [`roast/`](roast/) | Raku/roast | #2 patch and PR body | `c931c668` |
-| [`rakudo/`](rakudo/) | rakudo/rakudo | #4 issue body | `c931c668` |
-| [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 patches and PR bodies | `25d34f6d` |
+| [`moarvm/`](moarvm/) | MoarVM/MoarVM | #1 | `c931c668` |
+| [`nqp/`](nqp/) | Raku/nqp | #3 | `c931c668` |
+| [`roast/`](roast/) | Raku/roast | #2 | `c931c668` |
+| [`rakudo/`](rakudo/) | rakudo/rakudo | #4 | `c931c668` |
+| [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
@@ -133,12 +135,14 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 
 **Claude session:** `25d34f6d-d9d7-4dfb-bf4a-f84f83552d81`. Resume it with `cd ~/git/Gaurav-Gosain---tuios && claude --resume 25d34f6d-d9d7-4dfb-bf4a-f84f83552d81`; transcript in `~/.claude/projects/-home-cog-git-Gaurav-Gosain---tuios/25d34f6d-d9d7-4dfb-bf4a-f84f83552d81.jsonl`.
 
-| # | Branch | What | Status | Depends on |
-|---|---|---|---|---|
-| T1 | `feat/newhelp-1-engine` | engine, dock and desktop, help keys, KEYBINDINGS.md | tested, unsubmitted; raises the size ceiling to 50.5 MB | origin/main 4c12ece99 |
-| T2 | `feat/newhelp-2-rail-panes` | the rail and its sections, a pane's title bar and body | tested, unsubmitted | T1 |
-| T3 | `feat/newhelp-3-leader` | the explainer stands aside while the leader menu is up | tested, unsubmitted | T2 |
-| T4 | `feat/newhelp-4-dock-control` | opt-in `?` control on the dock | tested, unsubmitted | T3 |
+| # | What | Status | Needs |
+|---|---|---|---|
+| T1 | engine, dock, desktop | tested | main |
+| T2 | rail and panes | tested | T1 |
+| T3 | aside for leader menu | tested | T2 |
+| T4 | `?` control on the dock | tested | T3 |
+
+None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are `feat/newhelp-N-<topic>`.
 
 ### T1 Hover help explains the dock and the desktop
 
