@@ -1,6 +1,6 @@
 # Test tapping a stdout after the process bound to it exited
 
-Patch: 0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch (on Raku/roast 7639d08)
+Patch: roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch (on Raku/roast 7639d08)
 
 ## Summary
 

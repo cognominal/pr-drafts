@@ -6,6 +6,8 @@ Two series: the MoarVM crash investigation (below), and [tuios hover help](#tuio
 
 Status as of 2026-11-20. **Nothing has been pushed, submitted or posted.**
 
+**Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
+
 Started from MoarVM core dumps on this machine: 4 × SIGABRT, 2 × SIGBUS, 1 × SIGSEGV, plus one out-of-memory kill of the terminal session.
 
 Status values: **tested** (fix written and verified locally) · **unsubmitted** · **submitted** · **accepted** · **open** (no fix yet)
@@ -28,8 +30,8 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 - **Status:** tested, unsubmitted
 - **Branch:** `fix-bind-stdin-close` in `~/git/cognominal---moarvm`, 1 commit (94401a2a9) on `upstream/main` 5249be7aa (MoarVM/MoarVM)
-- **Patch:** `0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch`
-- **PR body:** `moarvm-pr.md`
+- **Patch:** [`moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch`](moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch)
+- **PR body:** [`moarvm/pr-fix-bind-stdin-close.md`](moarvm/pr-fix-bind-stdin-close.md)
 - **Depends on:** nothing
 - **Needed by:** #2 (roast test)
 - **What:** `src/io/procops.c`. When a process whose stdin was bound to another process's stdout exits, MoarVM called `close()` on a descriptor still owned by the producer's `uv_pipe_t`. A later read made libuv `abort()` in `uv__epoll_ctl_flush`. The fix closes it through `uv_close` on the owning handle, and falls back to `close()` only when no handle owns it.
@@ -38,7 +40,7 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
   - roast test #2: fails on Rakudo Star 2026.08, passes 5/5 with the fix
   - rakudo#3057 fd-leak check unchanged
   - roast `S17-procasync/*`, `S32-io/pipe.t`, `S29-os/system.t`: same results before and after
-- **To submit:** push the branch to your MoarVM fork, open the PR against `MoarVM/MoarVM` `main` with `moarvm-pr.md`.
+- **To submit:** push the branch to your MoarVM fork, open the PR against `MoarVM/MoarVM` `main` with `moarvm/pr-fix-bind-stdin-close.md`.
 
 ## NQP
 
@@ -46,8 +48,8 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 - **Status:** tested, unsubmitted
 - **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp)
-- **Patch:** `0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`
-- **PR body:** `nqp-pr.md`
+- **Patch:** [`nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`](nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch)
+- **PR body:** [`nqp/pr-atomic-mbc-write.md`](nqp/pr-atomic-mbc-write.md)
 - **Depends on:** nothing
 - **What:** `src/vm/moar/QAST/QASTCompilerMAST.nqp`, `assemble_to_file`. Rebuilding truncated `.moarvm` files that running processes had memory-mapped, which caused SIGBUS. The writer now writes `$filename.tmp-$pid` and renames it over the target.
 - **Tested:**
@@ -55,7 +57,7 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
   - NQP `make test`: 150 files, 13746 tests, all pass
 - **Reproduced:** recompiling a `.moarvm` file while a process is blocked in one of its subs makes that process fail when it resumes, 3/3 per variant (wrong-type and string-heap errors). With the patched NQP doing the recompile: 3/3 normal exit.
 - **Not tested:** the SIGBUS itself (needs the file to shrink under a mapped page; the diagnosis rests on the two core dumps' fault offsets); Windows `rename` over an existing file.
-- **To submit:** push the branch to your NQP fork, open the PR against `Raku/nqp` `main` with `nqp-pr.md`.
+- **To submit:** push the branch to your NQP fork, open the PR against `Raku/nqp` `main` with `nqp/pr-atomic-mbc-write.md`.
 
 ## roast
 
@@ -63,18 +65,18 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 - **Status:** tested, unsubmitted
 - **Branch:** `bind-stdin-tap-after-exit` in a **shallow clone in the Claude scratchpad**, which may be cleared. Commit a5df4d5 on Raku/roast 7639d08. The durable copy is the patch here.
-- **Patch:** `0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch`
-- **PR body:** `roast-pr.md`
+- **Patch:** [`roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch`](roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch)
+- **PR body:** [`roast/pr-bind-stdin-tap-after-exit.md`](roast/pr-bind-stdin-tap-after-exit.md)
 - **Depends on:** #1 merged and in a Rakudo release. Otherwise the test fails, as it does on Rakudo Star 2026.08.
 - **What:** adds test 18 to `S17-procasync/bind-handles.t`. It runs in a subprocess, so an abort fails one test instead of killing the file.
-- **To submit:** clone Raku/roast (or your fork), `git am` the patch, push, open the PR against `Raku/roast` `master` with `roast-pr.md`, referencing the MoarVM PR. Submit after #1.
+- **To submit:** clone Raku/roast (or your fork), `git am` the patch, push, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, referencing the MoarVM PR. Submit after #1.
 
 ## Rakudo
 
 ### #4 Issue: closing a Proc's `.out` early buffers the rest of the output without limit
 
 - **Status:** issue written, unsubmitted. No PR: the fix needs a design decision first.
-- **Draft:** `rakudo-issue-proc-out-close-oom.md`
+- **Draft:** [`rakudo/issue-proc-out-close-oom.md`](rakudo/issue-proc-out-close-oom.md)
 - **Depends on:** nothing to file it. The likely fix (close the read end so the producer gets SIGPIPE) would need a new MoarVM operation to close one output pipe of a running process: a follow-up MoarVM PR that doesn't exist yet.
 - **What:** `run 'yes', :out` then `.out.close` never returns and memory grows until the OOM killer steps in. Output piles up in MoarVM's read queue (Rakudo grants unlimited read permits) and in `Proc`'s `Channel`.
 - **Tested:**
@@ -100,16 +102,19 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 ---
 
-## Files in this folder
+## Layout
 
-| File | Purpose |
-|---|---|
-| `README.md` | this status page |
-| `moarvm-pr.md` | PR body for #1 |
-| `nqp-pr.md` | PR body for #3 |
-| `roast-pr.md` | PR body for #2 |
-| `rakudo-issue-proc-out-close-oom.md` | issue body for #4 |
-| `0001-*.patch` | one `git format-patch` per commit, for #1, #2 and #3 |
+One folder per upstream repo. Each holds the `git format-patch` files of its PRs and the PR or issue bodies to paste.
+
+| Folder | Upstream | Contents | Claude session |
+|---|---|---|---|
+| [`moarvm/`](moarvm/) | MoarVM/MoarVM | #1 patch and PR body | `c931c668` |
+| [`nqp/`](nqp/) | Raku/nqp | #3 patch and PR body | `c931c668` |
+| [`roast/`](roast/) | Raku/roast | #2 patch and PR body | `c931c668` |
+| [`rakudo/`](rakudo/) | rakudo/rakudo | #4 issue body | `c931c668` |
+| [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 patches and PR bodies | `25d34f6d` |
+
+Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
 ## Suggested order
 
@@ -124,7 +129,9 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 Status as of 2026-11-21. **Nothing has been pushed, submitted or posted.**
 
-A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current main, as **hover help**: Ctrl+b h toggles a borderless explainer next to the thing it explains. No localisation. Worktree: `~/.local/share/tuios/worktrees/Gaurav-Gosain---tuios/newhelp`. Branches `feat/newhelp-N-<topic>`, each on the one before. Files are in `tuios-newhelp/`.
+A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current main, as **hover help**: Ctrl+b h toggles a borderless explainer next to the thing it explains. No localisation. Worktree: `~/.local/share/tuios/worktrees/Gaurav-Gosain---tuios/newhelp`. Branches `feat/newhelp-N-<topic>`, each on the one before. Files are in [`tuios/`](tuios/).
+
+**Claude session:** `25d34f6d-d9d7-4dfb-bf4a-f84f83552d81`. Resume it with `cd ~/git/Gaurav-Gosain---tuios && claude --resume 25d34f6d-d9d7-4dfb-bf4a-f84f83552d81`; transcript in `~/.claude/projects/-home-cog-git-Gaurav-Gosain---tuios/25d34f6d-d9d7-4dfb-bf4a-f84f83552d81.jsonl`.
 
 | # | Branch | What | Status | Depends on |
 |---|---|---|---|---|
@@ -137,8 +144,8 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 
 - **Status:** tested, unsubmitted
 - **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then ee501bdbe, on origin/main 4c12ece99
-- **Patches:** `tuios-newhelp/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`, `tuios-newhelp/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`
-- **PR body:** `tuios-newhelp/pr1-engine.md`
+- **Patches:** [`tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`](tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch), [`tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch)
+- **PR body:** [`tuios/pr1-engine.md`](tuios/pr1-engine.md)
 - **Tested:**
   - 7 e2e tests in `e2e/tui/hover_help_test.go`: pass on the real and sim backends, and all 7 fail on main
   - `just check --changed` green
@@ -147,15 +154,15 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. Main had 84,096 B of room on Windows, so the first commit raises the ceiling to 50,500,000 B (your decision, 2026-11-20). `just size` passes, with 477,088 B left on windows/amd64.
 - **To submit:**
   1. Push the branch to your fork.
-  2. Open the PR against `Gaurav-Gosain/tuios` `main` with `pr1-engine.md`, marked ready only after `just check --changed`.
+  2. Open the PR against `Gaurav-Gosain/tuios` `main` with `tuios/pr1-engine.md`, marked ready only after `just check --changed`.
   3. The maintainer lands it with the `full-suite` label.
 
 ### T2 Hover help explains the rail and the panes
 
 - **Status:** tested, unsubmitted
 - **Commit:** 50cbf5143 on T1 ee501bdbe
-- **Patch:** `tuios-newhelp/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`
-- **PR body:** `tuios-newhelp/pr2-rail-panes.md`
+- **Patch:** [`tuios/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`](tuios/0003-feat-hover-help-explains-the-rail-and-the-panes.patch)
+- **PR body:** [`tuios/pr2-rail-panes.md`](tuios/pr2-rail-panes.md)
 - **Tested:**
   - 9 hover help e2e tests pass on the real and sim backends
   - the 2 new tests fail on a T1 build
@@ -164,28 +171,28 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - `TestIdleCostStaysLow` passes
   - size against T1: +24,576 B on linux/amd64, +27,648 B on windows/amd64, 449,440 B under the new ceiling
   - 2026-11-21: fixed after your manual test. A rail section's explainer covered the rest of the rail; it now goes beside the rail. The rail test checks it, and fails on the old build
-- **To submit:** after T1 is open, push the branch and open the PR with `pr2-rail-panes.md`, replacing `#T1` with T1's number.
+- **To submit:** after T1 is open, push the branch and open the PR with `tuios/pr2-rail-panes.md`, replacing `#T1` with T1's number.
 
 ### T3 Hover help stands aside for the leader menu
 
 - **Status:** tested, unsubmitted
 - **Commit:** 5dfbf0ef8 on T2 50cbf5143
-- **Patch:** `tuios-newhelp/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch`
-- **PR body:** `tuios-newhelp/pr3-leader.md`
+- **Patch:** [`tuios/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch`](tuios/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch)
+- **PR body:** [`tuios/pr3-leader.md`](tuios/pr3-leader.md)
 - **Tested:**
   - 10 hover help e2e tests pass on the real and sim backends
   - the new test fails on a T2 build, and on a build without the pointer freeze
   - `just check --changed` green
   - `TestIdleCostStaysLow` passes, renders=0
   - size: +0 B on all three targets
-- **To submit:** after T2 is open, push the branch and open the PR with `pr3-leader.md`, replacing `#T2`.
+- **To submit:** after T2 is open, push the branch and open the PR with `tuios/pr3-leader.md`, replacing `#T2`.
 
 ### T4 An opt-in ? control on the dock
 
 - **Status:** tested, unsubmitted
 - **Commit:** 13f751c95 on T3 5dfbf0ef8
-- **Patch:** `tuios-newhelp/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`
-- **PR body:** `tuios-newhelp/pr4-dock-control.md`
+- **Patch:** [`tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`](tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch)
+- **PR body:** [`tuios/pr4-dock-control.md`](tuios/pr4-dock-control.md)
 - **Tested:**
   - 11 hover help e2e tests pass on the real and sim backends
   - the new test fails on a T3 build
@@ -193,4 +200,4 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
   - the unit tests of config, app, input and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
   - size at the head: 49,619,104 B linux/amd64, 50,053,120 B windows/amd64 (446,880 B under the ceiling)
-- **To submit:** after T3 is open, push the branch and open the PR with `pr4-dock-control.md`, replacing `#T3`.
+- **To submit:** after T3 is open, push the branch and open the PR with `tuios/pr4-dock-control.md`, replacing `#T3`.
