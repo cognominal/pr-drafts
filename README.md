@@ -116,6 +116,7 @@ One folder per upstream repo. Each holds the `git format-patch` files of its PRs
 | [`rakudo/`](rakudo/) | rakudo/rakudo | #4 | `c931c668` |
 | [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
 | [`rak/`](rak/) | cognominal/rak | R1 | `c931c668` |
+| [`terminal-lineeditor/`](terminal-lineeditor/) | japhb/Terminal-LineEditor | R2 | `7c865896` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
@@ -215,11 +216,15 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 
 **Trigger:** a feature request of mine for irak, the interactive rak: before running a submission, insert `my` before undeclared variables and color each word by what it denotes; a second Enter within a second runs it.
 
-**Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27` (the MoarVM session, see above).
+**Claude sessions:**
+
+- R1 was filed from `c931c668-6e04-4d17-8ea8-8a92fadb9e27` (the MoarVM session, see above).
+- R2 and the implementation of R1 come from `7c865896-317a-4fb4-8b4a-9676a664420e`. Resume it with `cd ~/.local/share/tuios/worktrees/cognominal---rak/irak-feedback && claude --resume 7c865896-317a-4fb4-8b4a-9676a664420e`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-cognominal---rak-irak-feedback/7c865896-317a-4fb4-8b4a-9676a664420e.jsonl`.
 
 | # | Repo | Kind | Topic | Status |
 |---|---|---|---|---|
 | R1 | rak | [issue](https://github.com/cognominal/rak/issues/1) | irak feedback | filed |
+| R2 | LineEditor | PR | on-finish | tested |
 
 ### R1 [RFE] in irak add feedback before submission
 
@@ -228,4 +233,20 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 - **Contents:** the proposed behavior (where `my` goes, typos left alone, the one-second window) and an implementation in three parts: analysis by compiling without running, an `&on-finish` hook to propose upstream to Terminal::LineEditor, and coloring through a subclass of its input field.
 - **Open point:** compiling for the analysis runs `BEGIN` and `use` once more.
 - **Work:** being implemented by Claude in the tuios session `cognominal-rak-irak-feedback`, branch `irak-feedback` from `rak`, worktree `~/.local/share/tuios/worktrees/cognominal---rak/irak-feedback`. It is built against the latest NQP `main` (5397dd7da) and the MoarVM it pins, newer than the NQP_REVISION of `rak`.
-- **Next:** if the Terminal::LineEditor hook is chosen, it becomes an upstream PR tracked here.
+- **Implementation:** done and tested in that worktree, not committed yet. The first Enter inserts `my` and colors the line, a second Enter within a second runs it; `NO_COLOR` turns the colors off. Tested in a pty with `./rak`, with `t/02-rakudo/rak/022-irak-feedback.t` (24 tests), `t/02-rakudo/repl.t` and `make rak-test`. Documented in `CHEATSHEET.md` and the three irak tutorials.
+- **Depends on:** R2. Until it is merged, the rak build applies R2 as `tools/build/rak-line-editor-patches/Terminal-LineEditor-0.0.23.patch` to the pinned Terminal::LineEditor 0.0.23.
+- **Next:** commit on `irak-feedback`, merge into `rak`, close R1.
+
+### R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries
+
+- **Status:** tested, unsubmitted
+- **Branch:** `on-finish` in `~/git/japhb---Terminal-LineEditor`, 2 commits (371eff6, 2f97d14) on 97fa744 (release 0.0.23, japhb/Terminal-LineEditor). Not pushed anywhere: a fork is needed to submit.
+- **Patches:** [`terminal-lineeditor/0001-Time-out-terminal-queries-in-read-input.patch`](terminal-lineeditor/0001-Time-out-terminal-queries-in-read-input.patch), [`terminal-lineeditor/0002-Add-an-on-finish-callback-to-read-input-and-prompt.patch`](terminal-lineeditor/0002-Add-an-on-finish-callback-to-read-input-and-prompt.patch)
+- **PR body:** [`terminal-lineeditor/pr-on-finish.md`](terminal-lineeditor/pr-on-finish.md)
+- **Depends on:** nothing
+- **Needed by:** R1 (applied as a patch in the meantime)
+- **What:** `lib/Terminal/LineEditor/RawTerminalInput.rakumod`.
+  - `read-input` and `prompt` take `:&on-finish`, called with the buffer on Enter: `True` finishes, a string replaces the buffer and keeps editing, a false value keeps editing.
+  - The cursor-position and screen-size queries are sent together and time out after `$.query-timeout` (1 s), falling back to column 1 and 80 columns. A terminal that never answered hung the prompt.
+- **Tested:** the module's own tests pass; irak uses both changes (see R1).
+- **To submit:** fork japhb/Terminal-LineEditor, push `on-finish`, open the PR with the body above. The two commits are independent and could be split into two PRs.
