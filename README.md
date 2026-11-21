@@ -4,7 +4,7 @@ Two series: the MoarVM crash investigation (below), and [tuios hover help](#tuio
 
 # MoarVM crash investigation: issues and PRs
 
-Status as of 2026-11-21. **Nothing has been pushed, submitted or posted.** #1, #3 and #4 are ready to go: each body links back here and to rak.
+Status as of 2026-11-21. #1 is submitted; #3 and #4 are ready to go. Each body links back here and to rak.
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
@@ -16,13 +16,13 @@ Status values: **tested** (fix written and verified locally) · **unsubmitted** 
 
 | # | Repo | Kind | Fixes | Status | Needs |
 |---|---|---|---|---|---|
-| 1 | MoarVM | PR | 4 × SIGABRT | tested | — |
+| 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | submitted | — |
 | 2 | roast | PR | test for #1 | tested | #1 merged |
 | 3 | NQP | PR | 2 × SIGBUS, SIGSEGV | tested | — |
 | 4 | Rakudo | issue | OOM | written | — |
 | 5 | — | crash | SIGSEGV | diagnosed | fixed by #3 |
 
-None is submitted yet. Details per repo below.
+Only #1 is submitted so far. Details per repo below.
 
 ---
 
@@ -30,8 +30,8 @@ None is submitted yet. Details per repo below.
 
 ### #1 Close a bound stdin through libuv, not behind its back
 
-- **Status:** tested, unsubmitted
-- **Branch:** `fix-bind-stdin-close` in `~/git/cognominal---moarvm`, 1 commit (94401a2a9) on `upstream/main` 5249be7aa (MoarVM/MoarVM)
+- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087), awaiting review
+- **Branch:** `fix-bind-stdin-close` in `~/git/cognominal---moarvm`, 1 commit (94401a2a9) on `upstream/main` 5249be7aa (MoarVM/MoarVM), pushed to `cognominal/MoarVM-hamt`
 - **Patch:** [`moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch`](moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch)
 - **PR body:** [`moarvm/pr-fix-bind-stdin-close.md`](moarvm/pr-fix-bind-stdin-close.md)
 - **Depends on:** nothing
@@ -42,7 +42,7 @@ None is submitted yet. Details per repo below.
   - roast test #2: fails on Rakudo Star 2026.08, passes 5/5 with the fix
   - rakudo#3057 fd-leak check unchanged
   - roast `S17-procasync/*`, `S32-io/pipe.t`, `S29-os/system.t`: same results before and after
-- **To submit:** push the branch to your MoarVM fork, open the PR against `MoarVM/MoarVM` `main` with `moarvm/pr-fix-bind-stdin-close.md`.
+- **Next:** answer review comments on #2087; once merged, submit #2.
 
 ## NQP
 
@@ -71,7 +71,7 @@ None is submitted yet. Details per repo below.
 - **PR body:** [`roast/pr-bind-stdin-tap-after-exit.md`](roast/pr-bind-stdin-tap-after-exit.md)
 - **Depends on:** #1 merged and in a Rakudo release. Otherwise the test fails, as it does on Rakudo Star 2026.08.
 - **What:** adds test 18 to `S17-procasync/bind-handles.t`. It runs in a subprocess, so an abort fails one test instead of killing the file.
-- **To submit:** push the branch to your roast fork, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, referencing the MoarVM PR. Submit after #1.
+- **To submit:** push the branch to your roast fork, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, which references MoarVM/MoarVM#2087. Submit after #1.
 
 ## Rakudo
 
@@ -120,7 +120,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 ## Suggested order
 
-1. Submit #1 (MoarVM) and #3 (NQP); they are independent.
+1. ~~Submit #1 (MoarVM)~~ done: #2087. Submit #3 (NQP); it is independent.
 2. File #4 (Rakudo issue).
 3. Submit #2 (roast) once #1 is merged.
 4. Update the status column here as each one is submitted and accepted.

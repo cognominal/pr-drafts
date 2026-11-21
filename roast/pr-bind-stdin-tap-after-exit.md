@@ -15,7 +15,7 @@ Patch: roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch (on
 +  is output, 'alive'
 ```
 
-This is a regression test for MoarVM PR (Close a bound stdin through libuv). The scenario runs in a subprocess, so an abort fails one test instead of killing the whole file.
+This is a regression test for [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087) (Close a bound stdin through libuv). The scenario runs in a subprocess, so an abort fails one test instead of killing the whole file.
 
 ## Evidence
 
@@ -26,7 +26,7 @@ This is a regression test for MoarVM PR (Close a bound stdin through libuv). The
 
 **Door:** two-way
 
-**Blast Radius:** tests-only. It fails on Rakudo releases without the MoarVM fix, so merge it after the MoarVM PR.
+**Blast Radius:** tests-only. It fails on Rakudo releases without the MoarVM fix, so merge it after MoarVM/MoarVM#2087.
 
 ## Context
 
