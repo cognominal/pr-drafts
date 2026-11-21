@@ -8,7 +8,7 @@ Status as of 2026-11-20. **Nothing has been pushed, submitted or posted.**
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
-Started from MoarVM core dumps on this machine: 4 × SIGABRT, 2 × SIGBUS, 1 × SIGSEGV, plus one out-of-memory kill of the terminal session.
+**Trigger:** MoarVM kept crashing on this machine while I worked on rak, and one run took down my whole terminal session. I asked Claude to investigate the core dumps (4 × SIGABRT, 2 × SIGBUS, 1 × SIGSEGV) and the out-of-memory kill, reproduce each with a minimal program, and fix them against the upstream repos. Each cause sat in a different layer, so the fixes span MoarVM, NQP, roast and Rakudo.
 
 Status values: **tested** (fix written and verified locally) · **unsubmitted** · **submitted** · **accepted** · **open** (no fix yet)
 
@@ -130,6 +130,8 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 # tuios: hover help (newhelp)
 
 Status as of 2026-11-21. **Nothing has been pushed, submitted or posted.**
+
+**Trigger:** my own feature work on tuios: bringing Gaurav-Gosain/tuios#1859 (help mode) up to date.
 
 A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current main, as **hover help**: Ctrl+b h toggles a borderless explainer next to the thing it explains. No localisation. Worktree: `~/.local/share/tuios/worktrees/Gaurav-Gosain---tuios/newhelp`. Branches `feat/newhelp-N-<topic>`, each on the one before. Files are in [`tuios/`](tuios/).
 
