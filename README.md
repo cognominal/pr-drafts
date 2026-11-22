@@ -319,13 +319,13 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 
 ### O2 Put the user message between the OSC 133 B and C marks
 
-- **Status:** tested, unsubmitted. Waits for my own sentence in the PR body (CONTRIBUTING.md requires one, written by me); the placeholder is under `## What`.
+- **Status:** tested, unsubmitted. My own sentence (required by CONTRIBUTING.md) is in the body under `## What`.
 - **Claude session:** `955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`. Resume it with `cd ~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133 && claude --resume 955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-can1357---oh-my-pi-feat-osc133/955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7.jsonl`.
 - **Branch:** `feat/osc133` in `~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133`, commit `da62163174`, on `main` at `e1a9f4b41d`. Not pushed; I have no fork of oh-my-pi yet.
 - **Patch:** [`oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch`](oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch)
 - **PR body:** [`oh-my-pi/pr-feat-osc133.md`](oh-my-pi/pr-feat-osc133.md)
 - **What:** `UserMessageComponent.render()` emits `133;A` + `133;B` before the bubble and `133;C` + `133;D;0` after it, so the message is the command span. Fixes O1 (#20123).
-- **Tested:** tuios's `ParseBlocks` through a `go test -overlay` test (old layout 0 blocks, new 1 block with the message); live in a tuios 0.13.2 pane, where `capture-pane --commands` splits at each prompt and `<leader> s` lists them; the OSC 133 tests in `coding-agent` and `tui` pass. `bun check`'s TypeScript half passes; its Rust half needs `cargo`.
+- **Tested:** tuios's `ParseBlocks` through a `go test -overlay` test (old layout 0 blocks, new 1 block with the message); live in a tuios 0.13.2 pane, where `capture-pane --commands` splits at each prompt and `<leader> s` lists them; the OSC 133 tests in `coding-agent` and `tui` pass. `bun check`'s TypeScript half passes; its Rust half needs `cargo`. Full `bun run test` on 2026-11-22: 238 of 248 chunks pass; the 10 failing files fail identically on the base commit (desktop, relay browser, `mise` network, `cargo`, and an order-flaky `memory-tools.test.ts`).
 - **Not tested:** Ghostty's click-to-move with the message cells now marked as input.
 - **Depends on:** nothing. Fixes O1.
-- **Submit:** add my sentence to the body, then `gh repo fork can1357/oh-my-pi --remote=false`, push `feat/osc133` to the fork, and `gh pr create -R can1357/oh-my-pi --head cognominal:feat/osc133 --title "fix(tui): put the user message between the OSC 133 B and C marks" --body-file oh-my-pi/pr-feat-osc133.md` (drop the title line from the body first). After creation, add the PR link and `by @cognominal` to the changelog entry, push, and tick the checklist.
+- **Submit:** `gh repo fork can1357/oh-my-pi --remote=false`, push `feat/osc133` to the fork, and `gh pr create -R can1357/oh-my-pi --head cognominal:feat/osc133 --title "fix(tui): put the user message between the OSC 133 B and C marks" --body-file oh-my-pi/pr-feat-osc133.md` (drop the title line from the body first). After creation, add the PR link and `by @cognominal` to the changelog entry, push, and tick the checklist.
