@@ -35,6 +35,7 @@ Upstream PRs and issues, and issues in my own repos. Four series: the MoarVM cra
   - [R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries](#r2-terminallineeditor-an-on-finish-callback-and-a-timeout-on-terminal-queries)
 - [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks)
   - [O1 The OSC 133 marks on a user message leave the command empty](#o1-the-osc-133-marks-on-a-user-message-leave-the-command-empty)
+  - [O2 Put the user message between the OSC 133 B and C marks](#o2-put-the-user-message-between-the-osc-133-b-and-c-marks)
 
 # MoarVM crash investigation: issues and PRs
 
@@ -151,7 +152,7 @@ One folder per upstream repo. Each holds the `git format-patch` files of its PRs
 | [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
 | [`rak/`](rak/) | cognominal/rak | R1 | `c931c668` |
 | [`terminal-lineeditor/`](terminal-lineeditor/) | japhb/Terminal-LineEditor | R2 | `7c865896` |
-| [`oh-my-pi/`](oh-my-pi/) | can1357/oh-my-pi | O1 | `40df6d54` |
+| [`oh-my-pi/`](oh-my-pi/) | can1357/oh-my-pi | O1, O2 | `40df6d54`, `955da6aa` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
@@ -302,6 +303,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 | # | Repo | Kind | Topic | Status |
 |---|---|---|---|---|
 | O1 | oh-my-pi | [issue](https://github.com/can1357/oh-my-pi/issues/20123) | OSC 133 | filed |
+| O2 | oh-my-pi | PR | fixes O1 | tested |
 
 ### O1 The OSC 133 marks on a user message leave the command empty
 
@@ -314,3 +316,16 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 - **Depends on:** nothing
 - **Not done:** no workaround in tuios. tuios also drops a `working` OSC 7501 record on `133;A` (`internal/session/program_status.go`), as #17145 describes for Rex; omp now turns the marks off while a run is active.
 - **Next:** follow the discussion on #20123.
+
+### O2 Put the user message between the OSC 133 B and C marks
+
+- **Status:** tested, unsubmitted. Waits for my own sentence in the PR body (CONTRIBUTING.md requires one, written by me); the placeholder is under `## What`.
+- **Claude session:** `955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`. Resume it with `cd ~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133 && claude --resume 955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-can1357---oh-my-pi-feat-osc133/955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7.jsonl`.
+- **Branch:** `feat/osc133` in `~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133`, commit `da62163174`, on `main` at `e1a9f4b41d`. Not pushed; I have no fork of oh-my-pi yet.
+- **Patch:** [`oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch`](oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch)
+- **PR body:** [`oh-my-pi/pr-feat-osc133.md`](oh-my-pi/pr-feat-osc133.md)
+- **What:** `UserMessageComponent.render()` emits `133;A` + `133;B` before the bubble and `133;C` + `133;D;0` after it, so the message is the command span. Fixes O1 (#20123).
+- **Tested:** tuios's `ParseBlocks` through a `go test -overlay` test (old layout 0 blocks, new 1 block with the message); live in a tuios 0.13.2 pane, where `capture-pane --commands` splits at each prompt and `<leader> s` lists them; the OSC 133 tests in `coding-agent` and `tui` pass. `bun check`'s TypeScript half passes; its Rust half needs `cargo`.
+- **Not tested:** Ghostty's click-to-move with the message cells now marked as input.
+- **Depends on:** nothing. Fixes O1.
+- **Submit:** add my sentence to the body, then `gh repo fork can1357/oh-my-pi --remote=false`, push `feat/osc133` to the fork, and `gh pr create -R can1357/oh-my-pi --head cognominal:feat/osc133 --title "fix(tui): put the user message between the OSC 133 B and C marks" --body-file oh-my-pi/pr-feat-osc133.md` (drop the title line from the body first). After creation, add the PR link and `by @cognominal` to the changelog entry, push, and tick the checklist.
