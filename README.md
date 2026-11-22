@@ -2,6 +2,31 @@
 
 Upstream PRs and issues, and issues in my own repos. Three series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), and [rak: irak feedback](#rak-irak-feedback-before-submission) (at the end).
 
+## Contents
+
+- [MoarVM crash investigation: issues and PRs](#moarvm-crash-investigation-issues-and-prs)
+  - [Overview](#overview)
+  - [MoarVM](#moarvm)
+    - [#1 Close a bound stdin through libuv, not behind its back](#1-close-a-bound-stdin-through-libuv-not-behind-its-back)
+  - [NQP](#nqp)
+    - [#3 Write bytecode files to a temporary file and rename it into place](#3-write-bytecode-files-to-a-temporary-file-and-rename-it-into-place)
+  - [roast](#roast)
+    - [#2 Test tapping a stdout after the process bound to it exited](#2-test-tapping-a-stdout-after-the-process-bound-to-it-exited)
+  - [Rakudo](#rakudo)
+    - [#4 Issue: closing a Proc's `.out` early buffers the rest of the output without limit](#4-issue-closing-a-procs-out-early-buffers-the-rest-of-the-output-without-limit)
+  - [Not attributed to a repo](#not-attributed-to-a-repo)
+    - [#5 SIGSEGV of 20 Nov 04:49](#5-sigsegv-of-20-nov-0449)
+  - [Layout](#layout)
+  - [Suggested order](#suggested-order)
+- [tuios: hover help (newhelp)](#tuios-hover-help-newhelp)
+  - [T1 Hover help explains the dock and the desktop](#t1-hover-help-explains-the-dock-and-the-desktop)
+  - [T2 Hover help explains the rail and the panes](#t2-hover-help-explains-the-rail-and-the-panes)
+  - [T3 Hover help stands aside for the leader menu](#t3-hover-help-stands-aside-for-the-leader-menu)
+  - [T4 An opt-in ? control on the dock](#t4-an-opt-in--control-on-the-dock)
+- [rak: irak feedback before submission](#rak-irak-feedback-before-submission)
+  - [R1 \[RFE\] in irak add feedback before submission](#r1-rfe-in-irak-add-feedback-before-submission)
+  - [R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries](#r2-terminallineeditor-an-on-finish-callback-and-a-timeout-on-terminal-queries)
+
 # MoarVM crash investigation: issues and PRs
 
 Status as of 2026-11-21. #1, #3 and #4 are submitted; #2 waits for #1 to be merged. Each body links back here and to rak.
