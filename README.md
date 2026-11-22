@@ -1,12 +1,13 @@
 # Issues and PRs
 
-Upstream PRs and issues, and issues in my own repos. Three series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), and [rak: irak feedback](#rak-irak-feedback-before-submission) (at the end).
+Upstream PRs and issues, and issues in my own repos. Four series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), [rak: irak feedback](#rak-irak-feedback-before-submission), and [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks) (at the end).
 
 ## At a glance
 
 - [MoarVM crash investigation](#moarvm-crash-investigation-issues-and-prs)
 - [tuios: hover help](#tuios-hover-help-newhelp)
 - [rak: irak feedback](#rak-irak-feedback-before-submission)
+- [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks)
 
 ## Contents
 
@@ -32,6 +33,8 @@ Upstream PRs and issues, and issues in my own repos. Three series: the MoarVM cr
 - [rak: irak feedback before submission](#rak-irak-feedback-before-submission)
   - [R1 \[RFE\] in irak add feedback before submission](#r1-rfe-in-irak-add-feedback-before-submission)
   - [R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries](#r2-terminallineeditor-an-on-finish-callback-and-a-timeout-on-terminal-queries)
+- [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks)
+  - [O1 The OSC 133 marks on a user message leave the command empty](#o1-the-osc-133-marks-on-a-user-message-leave-the-command-empty)
 
 # MoarVM crash investigation: issues and PRs
 
@@ -148,6 +151,7 @@ One folder per upstream repo. Each holds the `git format-patch` files of its PRs
 | [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
 | [`rak/`](rak/) | cognominal/rak | R1 | `c931c668` |
 | [`terminal-lineeditor/`](terminal-lineeditor/) | japhb/Terminal-LineEditor | R2 | `7c865896` |
+| [`oh-my-pi/`](oh-my-pi/) | can1357/oh-my-pi | O1 | `40df6d54` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
@@ -286,3 +290,27 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - The cursor-position and screen-size queries are sent together and time out after `$.query-timeout` (1 s), falling back to column 1 and 80 columns. A terminal that never answered hung the prompt.
 - **Tested:** the module's own tests pass; irak uses both changes (see R1).
 - **To submit:** fork japhb/Terminal-LineEditor, push `on-finish`, open the PR with the body above. The two commits are independent and could be split into two PRs.
+
+---
+
+# oh-my-pi: OSC 133 marks
+
+**Trigger:** omp sends OSC 133, but the tuios scrollback browser (`<leader> s`) lists no command in an omp pane. Diagnosed in tuios, then filed upstream instead of working around it in tuios.
+
+**Claude session:** `40df6d54-c106-447d-acd9-d8c333c2a809`. Resume it with `cd ~/.local/share/tuios/worktrees/Gaurav-Gosain---tuios/omp-osc133 && claude --resume 40df6d54-c106-447d-acd9-d8c333c2a809`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-Gaurav-Gosain---tuios-omp-osc133/40df6d54-c106-447d-acd9-d8c333c2a809.jsonl`.
+
+| # | Repo | Kind | Topic | Status |
+|---|---|---|---|---|
+| O1 | oh-my-pi | [issue](https://github.com/can1357/oh-my-pi/issues/20123) | OSC 133 | filed |
+
+### O1 The OSC 133 marks on a user message leave the command empty
+
+- **Status:** filed 2026-11-22 as [can1357/oh-my-pi#20123](https://github.com/can1357/oh-my-pi/issues/20123)
+- **Body:** [`oh-my-pi/issue-osc133-empty-command.md`](oh-my-pi/issue-osc133-empty-command.md)
+- **What:** `UserMessageComponent.render()` in `packages/tui/src/chat/user-message.ts` puts `133;A` at the start of the bubble and `133;B`, `C` and `D;0` together at the end of its last row. The message lands in the prompt span, and the command span (`B`..`C`) is empty. tuios's scrollback parser (`internal/scrollback/parser.go`, `parseWithMarkers`) skips a block with an empty command, so an omp pane lists none.
+- **Proposed:** emit `B` right after `A`, keep `C` and `D` at the end of the same render, so the caret fix of #8030 holds. Optionally move `D` after the reply.
+- **Checked:** a `script` recording of omp 19.1.0 with two prompts: 6 copies of each mark (repaints write them again), all with `B`, `C` and `D` adjacent. `main` places the marks the same way.
+- **Related:** #8030 and #6115 (the caret bug), #17145 and #17307 (OSC 7501 side effects of the same marks).
+- **Depends on:** nothing
+- **Not done:** no workaround in tuios. tuios also drops a `working` OSC 7501 record on `133;A` (`internal/session/program_status.go`), as #17145 describes for Rex; omp now turns the marks off while a run is active.
+- **Next:** follow the discussion on #20123.
