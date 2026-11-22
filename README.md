@@ -323,7 +323,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 
 - **Status:** tested, unsubmitted. My own sentence (required by CONTRIBUTING.md) is in the body under `## What`.
 - **Claude session:** `955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`. Resume it with `cd ~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133 && claude --resume 955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-can1357---oh-my-pi-feat-osc133/955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7.jsonl`.
-- **Branch:** `feat/osc133` in `~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133`, commit `da62163174`, on `main` at `e1a9f4b41d`. Not pushed; I have no fork of oh-my-pi yet.
+- **Branch:** `feat/osc133` in `~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133`, commit `da62163174`, on `main` at `e1a9f4b41d`. Pushed to my fork: https://github.com/cognominal/oh-my-pi/tree/feat/osc133 (remote `fork` in the worktree).
 - **Patch:** [`oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch`](oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch)
 - **PR body:** [`oh-my-pi/pr-feat-osc133.md`](oh-my-pi/pr-feat-osc133.md)
 - **What:** `UserMessageComponent.render()` emits `133;A` + `133;B` before the bubble and `133;C` + `133;D;0` after it, so the message is the command span. Fixes O1 (#20123).
