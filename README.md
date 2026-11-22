@@ -2,6 +2,12 @@
 
 Upstream PRs and issues, and issues in my own repos. Three series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), and [rak: irak feedback](#rak-irak-feedback-before-submission) (at the end).
 
+## At a glance
+
+- [MoarVM crash investigation](#moarvm-crash-investigation-issues-and-prs)
+- [tuios: hover help](#tuios-hover-help-newhelp)
+- [rak: irak feedback](#rak-irak-feedback-before-submission)
+
 ## Contents
 
 - [MoarVM crash investigation: issues and PRs](#moarvm-crash-investigation-issues-and-prs)
