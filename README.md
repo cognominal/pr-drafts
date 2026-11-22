@@ -36,6 +36,7 @@ Upstream PRs and issues, and issues in my own repos. Four series: the MoarVM cra
 - [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks)
   - [O1 The OSC 133 marks on a user message leave the command empty](#o1-the-osc-133-marks-on-a-user-message-leave-the-command-empty)
   - [O2 Put the user message between the OSC 133 B and C marks](#o2-put-the-user-message-between-the-osc-133-b-and-c-marks)
+  - [O3 Relay browser tests fail wherever Chromium can launch](#o3-relay-browser-tests-fail-wherever-chromium-can-launch)
 
 # MoarVM crash investigation: issues and PRs
 
@@ -152,7 +153,7 @@ One folder per upstream repo. Each holds the `git format-patch` files of its PRs
 | [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
 | [`rak/`](rak/) | cognominal/rak | R1 | `c931c668` |
 | [`terminal-lineeditor/`](terminal-lineeditor/) | japhb/Terminal-LineEditor | R2 | `7c865896` |
-| [`oh-my-pi/`](oh-my-pi/) | can1357/oh-my-pi | O1, O2 | `40df6d54`, `955da6aa` |
+| [`oh-my-pi/`](oh-my-pi/) | can1357/oh-my-pi | O1–O3 | `40df6d54`, `955da6aa`, `3dfd2fbb` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
 
@@ -304,6 +305,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 |---|---|---|---|---|
 | O1 | oh-my-pi | [issue](https://github.com/can1357/oh-my-pi/issues/20123) | OSC 133 | filed |
 | O2 | oh-my-pi | PR | fixes O1 | tested |
+| O3 | oh-my-pi | issue | relay tests | drafted |
 
 ### O1 The OSC 133 marks on a user message leave the command empty
 
@@ -325,7 +327,18 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 - **Patch:** [`oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch`](oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch)
 - **PR body:** [`oh-my-pi/pr-feat-osc133.md`](oh-my-pi/pr-feat-osc133.md)
 - **What:** `UserMessageComponent.render()` emits `133;A` + `133;B` before the bubble and `133;C` + `133;D;0` after it, so the message is the command span. Fixes O1 (#20123).
-- **Tested:** tuios's `ParseBlocks` through a `go test -overlay` test (old layout 0 blocks, new 1 block with the message); live in a tuios 0.13.2 pane, where `capture-pane --commands` splits at each prompt and `<leader> s` lists them; the OSC 133 tests in `coding-agent` and `tui` pass. `bun check`'s TypeScript half passes; its Rust half needs `cargo`. Full `bun run test` on 2026-11-22: 238 of 248 chunks pass; the 10 failing files fail on the base commit too (desktop, relay browser, `mise` network, `cargo`, and an order-flaky `memory-tools.test.ts`).
+- **Tested:** tuios's `ParseBlocks` through a `go test -overlay` test (old layout 0 blocks, new 1 block with the message); live in a tuios 0.13.2 pane, where `capture-pane --commands` splits at each prompt and `<leader> s` lists them; the OSC 133 tests in `coding-agent` and `tui` pass. `bun check` passes, Rust half included (rustup installed 2026-11-22). `bun run test:rs`: 7341 of 7366; 17 `omp-vcs` failures come from my `diff.mnemonicprefix` (pass with `GIT_CONFIG_GLOBAL=/dev/null`), 8 `omp-shell` ones from this machine's zsh, glibc and curses. No Rust changed. Full `bun run test` on 2026-11-22: 238 of 248 chunks pass; the 10 failing files fail on the base commit too (desktop, relay browser, `mise` network, `cargo`, and an order-flaky `memory-tools.test.ts`).
 - **Not tested:** Ghostty's click-to-move with the message cells now marked as input.
 - **Depends on:** nothing. Fixes O1.
 - **Submit:** `gh repo fork can1357/oh-my-pi --remote=false`, push `feat/osc133` to the fork, and `gh pr create -R can1357/oh-my-pi --head cognominal:feat/osc133 --title "fix(tui): put the user message between the OSC 133 B and C marks" --body-file oh-my-pi/pr-feat-osc133.md` (drop the title line from the body first). After creation, add the PR link and `by @cognominal` to the changelog entry, push, and tick the checklist.
+
+### O3 Relay browser tests fail wherever Chromium can launch
+
+- **Status:** drafted, not filed.
+- **Claude session:** `3dfd2fbb-d39f-4e92-9fc6-945b472cf896`. Resume it with `cd ~/git/cognominal---pr-drafts && claude --resume 3dfd2fbb-d39f-4e92-9fc6-945b472cf896`; transcript in `~/.claude/projects/-home-cog-git-cognominal---pr-drafts/3dfd2fbb-d39f-4e92-9fc6-945b472cf896.jsonl`.
+- **Trigger:** the full `bun run test` run for O2.
+- **Body:** [`oh-my-pi/issue-browser-relay-tests.md`](oh-my-pi/issue-browser-relay-tests.md)
+- **What:** on `main` (`e1a9f4b41d`) with system Chromium 157, `browser-relay-tab-isolation.test.ts` fails 12 of 13 because it opens the extension's `options.html`, deleted in `f2b60070e0` (2026-11-20). `browser-background-input.test.ts` fails 3 of 4 with `no-extension`; cause guessed, not confirmed. CI stays green, presumably because its runners skip both files (`skipIf(!CHROMIUM_AVAILABLE)`).
+- **Checked:** rebuilt the extension with `bun run gen:relay-extension`: no change. The extension ID Chromium assigns matches `unpackedExtensionId`.
+- **Depends on:** nothing. Not caused by O2: same failures on its base commit.
+- **Submit:** `gh issue create -R can1357/oh-my-pi --title "Relay browser tests fail wherever Chromium can launch, since the native-host refactor" --body-file oh-my-pi/issue-browser-relay-tests.md` (drop the title line from the body first).

@@ -22,14 +22,15 @@ Fixes #20123. Terminals that read the command from `B`..`C` got an empty string 
 - **tuios's own parser:** fed both layouts to tuios `internal/scrollback.ParseBlocks` (via a `go test -overlay` test). Before: 0 blocks. After: 1 block, `cmd="hello from omp"`.
 - **End to end in tuios 0.13.2:** ran this branch's omp in a tuios pane and sent two prompts. `tuios capture-pane --commands 5` splits the pane at both prompts, and `<leader> s` lists them.
 - **Tests:** `user-message-keywords.test.ts` now checks that the bubble text sits between `B` and `C` and that the zone closes after the last row. The OSC 133 tests in `coding-agent` and `tui` pass (20 + 74).
-- **`bun run test`** (the full local suite, Arch Linux): 238 of 248 chunks pass. I reran each failing file on this branch and on its base `e1a9f4b41d`: they fail there too (or, for `bash-interactive.test.ts`, intermittently on both). They need a desktop session, a relay browser, `mise` network access or `cargo`, or they are order-flaky (`memory-tools.test.ts` fails 1 or 2 tests per run on both). None touch the TUI renderer.
-- `bun check`: the TypeScript half passes. The Rust half could not run here (no `cargo` on PATH), and this change touches no Rust.
+- **`bun run test`** (the full local suite, Arch Linux): 238 of 248 chunks pass. I reran each failing file on this branch and on its base `e1a9f4b41d`: they fail there too (or, for `bash-interactive.test.ts`, intermittently on both). They need a desktop session, a relay browser or `mise` network access, or they are order-flaky (`memory-tools.test.ts` fails 1 or 2 tests per run on both). None touch the TUI renderer.
+- `bun check` passes (TypeScript and Rust).
+- **`bun run test:rs`:** this change touches no Rust. 7341 of 7366 pass. The 17 `omp-vcs` failures come from my `diff.mnemonicprefix` git setting (all 127 pass with `GIT_CONFIG_GLOBAL=/dev/null`); the 8 `omp-shell` ones compare against this machine's zsh, glibc and curses.
 
 Not checked: Ghostty itself. The message cells now carry Ghostty's input mark between `B` and `C`. Click-to-move only acts while the cursor is at a prompt, and `C` in the same render ends that, but I have no Ghostty to confirm it.
 
 ---
 
-- [ ] `bun check` passes
+- [x] `bun check` passes
 - [x] Tested locally
 - [ ] CHANGELOG updated with the required attribution (if user-facing; internal issue fixes use issue links, external contributions add the PR link and contributor credit after creation)
 
