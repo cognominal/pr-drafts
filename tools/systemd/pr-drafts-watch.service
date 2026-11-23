@@ -1,0 +1,8 @@
+[Unit]
+Description=Check the PRs and issues tracked by pr-drafts on GitHub
+
+[Service]
+Type=oneshot
+# gh and claude come from mise; tuios from ~/.local/bin.
+Environment=PATH=%h/.local/share/mise/shims:%h/.local/share/mise/command-wrappers/bin:%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=%h/git/cognominal---pr-drafts/tools/watch.sh

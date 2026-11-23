@@ -2,6 +2,8 @@
 
 Upstream PRs and issues, and issues in my own repos. Four series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), [rak: irak feedback](#rak-irak-feedback-before-submission), and [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks) (at the end).
 
+An hourly check, [`tools/watch.sh`](tools/watch.sh), looks at every PR and issue linked here on GitHub. When one changed, it shows a desktop notice and starts a Claude agent in the tuios session `pr-drafts`, which updates this page, commits, pushes and leaves a summary in the tuios Inbox. A systemd user timer runs it: [`tools/systemd/`](tools/systemd/), installed with `systemctl --user link` on both files, then `systemctl --user enable --now pr-drafts-watch.timer`.
+
 ## At a glance
 
 - [MoarVM crash investigation](#moarvm-crash-investigation-issues-and-prs)
