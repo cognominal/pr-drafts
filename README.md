@@ -86,7 +86,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #3 Write bytecode files to a temporary file and rename it into place
 
-- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882). **Approved** by lizmat on 2026-11-21, not merged yet (checked 2026-11-23).
+- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882). **Approved** by lizmat on 2026-11-21, approved again by lizmat on 2026-11-23 (same commit 5b8779a). Mergeable, not merged yet (checked 2026-11-23). cognominal is a Raku org member, so may be able to merge it directly.
 - **Discussion:** the rest of the thread is off topic: lizmat offered the name "srak" (srak.rocks) for a Raku shell, and pointed out that [`App::Rak`](https://raku.land/zef:lizmat/App::Rak) already installs a `rak` executable, a name clash for the rak project (R1).
 - **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp), pushed to `cognominal/nqp`
 - **Patch:** [`nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`](nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch)
