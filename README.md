@@ -54,7 +54,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 | # | Repo | Kind | Fixes | Status | Needs |
 |---|---|---|---|---|---|
-| 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | submitted | — |
+| 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | approved | merge |
 | 2 | roast | PR | test for #1 | tested | #1 merged |
 | 3 | NQP | [PR](https://github.com/Raku/nqp/pull/882) | 2 × SIGBUS, SIGSEGV | approved | merge |
 | 4 | Rakudo | [issue](https://github.com/rakudo/rakudo/issues/6951) | OOM | filed | — |
@@ -68,7 +68,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #1 Close a bound stdin through libuv, not behind its back
 
-- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087). Open, not merged. lizmat commented "Thanks!" on 2026-11-21; no formal review yet (checked 2026-11-23).
+- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087). Open, not merged. lizmat commented "Thanks!" on 2026-11-21 and **approved** it on 2026-11-23 at 19:36, without comment. Not merged yet (checked 2026-11-23).
 - **Branch:** `fix-bind-stdin-close` in `~/git/cognominal---moarvm`, 1 commit (94401a2a9) on `upstream/main` 5249be7aa (MoarVM/MoarVM), pushed to `cognominal/MoarVM-hamt`
 - **Patch:** [`moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch`](moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch)
 - **PR body:** [`moarvm/pr-fix-bind-stdin-close.md`](moarvm/pr-fix-bind-stdin-close.md)
@@ -80,14 +80,14 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
   - roast test #2: fails on Rakudo Star 2026.08, passes 5/5 with the fix
   - rakudo#3057 fd-leak check unchanged
   - roast `S17-procasync/*`, `S32-io/pipe.t`, `S29-os/system.t`: same results before and after
-- **Next:** answer review comments on #2087; once merged, submit #2.
+- **Next:** wait for a MoarVM committer to merge #2087; once merged, submit #2.
 
 ## NQP
 
 ### #3 Write bytecode files to a temporary file and rename it into place
 
 - **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882). **Approved** by lizmat on 2026-11-21, approved again by lizmat on 2026-11-23 (same commit 5b8779a). At 17:59 the same day lizmat pushed a second commit to the PR branch, 1578b1590 "Change temporary file naming to use current time": the temp name becomes `$filename.tmp-` ~ `nqp::time()` instead of `nqp::getpid()`, "to avoid issues with maybe in the future having two threads writing bytecode files at the same time". Mergeable, not merged yet (checked 2026-11-23). cognominal's local branch is now one commit behind `cognominal/nqp`. cognominal is a Raku org member, so may be able to merge it directly.
-- **Discussion:** the rest of the thread is off topic: lizmat offered the name "srak" (srak.rocks) for a Raku shell, and pointed out that [`App::Rak`](https://raku.land/zef:lizmat/App::Rak) already installs a `rak` executable, a name clash for the rak project (R1).
+- **Discussion:** the rest of the thread is off topic: lizmat offered the name "srak" (srak.rocks) for a Raku shell, and pointed out that [`App::Rak`](https://raku.land/zef:lizmat/App::Rak) already installs a `rak` executable, a name clash for the rak project (R1). cognominal replied on 2026-11-21 with off-topic political remarks and a plan to port Rust's `regex` crate to MoarVM for UTF-8. On 2026-11-23 at 19:26 lizmat answered: she knowingly supports Ukraine, asks for a URL about the vrurg remark, notes MoarVM already handles UTF-8 (NFG), stores ASCII strings at 1 byte per codepoint and short strings inline in the header, and that Larry Wall left after 6.d (2018) while Jonathan Worthington is on indefinite hiatus. Nothing in it bears on the PR.
 - **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp), pushed to `cognominal/nqp`
 - **Patch:** [`nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`](nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch)
 - **PR body:** [`nqp/pr-atomic-mbc-write.md`](nqp/pr-atomic-mbc-write.md)
