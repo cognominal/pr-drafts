@@ -40,7 +40,7 @@ Upstream PRs and issues, and issues in my own repos. Four series: the MoarVM cra
 
 # MoarVM crash investigation: issues and PRs
 
-Status as of 2026-11-21. #1, #3 and #4 are submitted; #2 waits for #1 to be merged. Each body links back here and to rak.
+Status as of 2026-11-23 (checked on GitHub). #1, #3 and #4 are submitted, none merged yet; #3 is approved; #2 waits for #1 to be merged. Each body links back here and to rak.
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
@@ -54,7 +54,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 |---|---|---|---|---|---|
 | 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | submitted | — |
 | 2 | roast | PR | test for #1 | tested | #1 merged |
-| 3 | NQP | [PR](https://github.com/Raku/nqp/pull/882) | 2 × SIGBUS, SIGSEGV | submitted | — |
+| 3 | NQP | [PR](https://github.com/Raku/nqp/pull/882) | 2 × SIGBUS, SIGSEGV | approved | merge |
 | 4 | Rakudo | [issue](https://github.com/rakudo/rakudo/issues/6951) | OOM | filed | — |
 | 5 | — | crash | SIGSEGV | diagnosed | fixed by #3 |
 
@@ -66,7 +66,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #1 Close a bound stdin through libuv, not behind its back
 
-- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087), awaiting review
+- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087). Open, not merged. lizmat commented "Thanks!" on 2026-11-21; no formal review yet (checked 2026-11-23).
 - **Branch:** `fix-bind-stdin-close` in `~/git/cognominal---moarvm`, 1 commit (94401a2a9) on `upstream/main` 5249be7aa (MoarVM/MoarVM), pushed to `cognominal/MoarVM-hamt`
 - **Patch:** [`moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch`](moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch)
 - **PR body:** [`moarvm/pr-fix-bind-stdin-close.md`](moarvm/pr-fix-bind-stdin-close.md)
@@ -84,7 +84,8 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #3 Write bytecode files to a temporary file and rename it into place
 
-- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882), awaiting review
+- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882). **Approved** by lizmat on 2026-11-21, not merged yet (checked 2026-11-23).
+- **Discussion:** the rest of the thread is off topic: lizmat offered the name "srak" (srak.rocks) for a Raku shell, and pointed out that [`App::Rak`](https://raku.land/zef:lizmat/App::Rak) already installs a `rak` executable, a name clash for the rak project (R1).
 - **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp), pushed to `cognominal/nqp`
 - **Patch:** [`nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`](nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch)
 - **PR body:** [`nqp/pr-atomic-mbc-write.md`](nqp/pr-atomic-mbc-write.md)
@@ -95,7 +96,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
   - NQP `make test`: 150 files, 13746 tests, all pass
 - **Reproduced:** recompiling a `.moarvm` file while a process is blocked in one of its subs makes that process fail when it resumes, 3/3 per variant (wrong-type and string-heap errors). With the patched NQP doing the recompile: 3/3 normal exit.
 - **Not tested:** the SIGBUS itself (needs the file to shrink under a mapped page; the diagnosis rests on the two core dumps' fault offsets); Windows `rename` over an existing file.
-- **Next:** answer review comments on #882.
+- **Next:** wait for the merge.
 
 ## roast
 
@@ -113,7 +114,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #4 Issue: closing a Proc's `.out` early buffers the rest of the output without limit
 
-- **Status:** filed 2026-11-21 as [rakudo/rakudo#6951](https://github.com/rakudo/rakudo/issues/6951). No PR: the fix needs a design decision first.
+- **Status:** filed 2026-11-21 as [rakudo/rakudo#6951](https://github.com/rakudo/rakudo/issues/6951). Open, no comment yet (checked 2026-11-23). No PR: the fix needs a design decision first.
 - **Draft:** [`rakudo/issue-proc-out-close-oom.md`](rakudo/issue-proc-out-close-oom.md)
 - **Depends on:** nothing to file it. The likely fix (close the read end so the producer gets SIGPIPE) would need a new MoarVM operation to close one output pipe of a running process: a follow-up MoarVM PR that doesn't exist yet.
 - **What:** `run 'yes', :out` then `.out.close` never returns and memory grows until the OOM killer steps in. Output piles up in MoarVM's read queue (Rakudo grants unlimited read permits) and in `Proc`'s `Channel`.
@@ -304,7 +305,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 | # | Repo | Kind | Topic | Status |
 |---|---|---|---|---|
 | O1 | oh-my-pi | [issue](https://github.com/can1357/oh-my-pi/issues/20123) | OSC 133 | filed |
-| O2 | oh-my-pi | PR | fixes O1 | tested |
+| O2 | oh-my-pi | PR | fixes O1 | superseded |
 | O3 | oh-my-pi | issue | relay tests | drafted |
 
 ### O1 The OSC 133 marks on a user message leave the command empty
@@ -317,11 +318,12 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 - **Related:** #8030 and #6115 (the caret bug), #17145 and #17307 (OSC 7501 side effects of the same marks).
 - **Depends on:** nothing
 - **Not done:** no workaround in tuios. tuios also drops a `working` OSC 7501 record on `133;A` (`internal/session/program_status.go`), as #17145 describes for Rex; omp now turns the marks off while a run is active.
-- **Next:** follow the discussion on #20123.
+- **Response:** on 2026-11-22 the maintainers' bot `roboomp` reproduced it on `main` and opened [can1357/oh-my-pi#20124](https://github.com/can1357/oh-my-pi/pull/20124), "fix(tui): placed user message in the osc 133 command span": `133;A` + `133;B` open the bubble, `133;C` + `133;D;0` close it, the same layout as O2. Moving `D` after the reply is left out. Open, not merged (checked 2026-11-23).
+- **Next:** wait for #20124 to be merged, then check that tuios lists the commands, and close O1 if the bot does not.
 
 ### O2 Put the user message between the OSC 133 B and C marks
 
-- **Status:** tested, unsubmitted. My own sentence (required by CONTRIBUTING.md) is in the body under `## What`.
+- **Status:** superseded by [can1357/oh-my-pi#20124](https://github.com/can1357/oh-my-pi/pull/20124) (the maintainers' bot, same fix). Do not submit. If useful, review #20124 instead: it also touches `packages/coding-agent/src/tools/browser/relay/server.ts` (a `parseFlag` import), unrelated to O1.
 - **Claude session:** `955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`. Resume it with `cd ~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133 && claude --resume 955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-can1357---oh-my-pi-feat-osc133/955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7.jsonl`.
 - **Branch:** `feat/osc133` in `~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133`, commit `da62163174`, on `main` at `e1a9f4b41d`. Pushed to my fork: https://github.com/cognominal/oh-my-pi/tree/feat/osc133 (remote `fork` in the worktree).
 - **Patch:** [`oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch`](oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch)
@@ -334,7 +336,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 
 ### O3 Relay browser tests fail wherever Chromium can launch
 
-- **Status:** drafted, not filed.
+- **Status:** drafted, not filed (no matching issue on GitHub, checked 2026-11-23).
 - **Claude session:** `3dfd2fbb-d39f-4e92-9fc6-945b472cf896`. Resume it with `cd ~/git/cognominal---pr-drafts && claude --resume 3dfd2fbb-d39f-4e92-9fc6-945b472cf896`; transcript in `~/.claude/projects/-home-cog-git-cognominal---pr-drafts/3dfd2fbb-d39f-4e92-9fc6-945b472cf896.jsonl`.
 - **Trigger:** the full `bun run test` run for O2.
 - **Body:** [`oh-my-pi/issue-browser-relay-tests.md`](oh-my-pi/issue-browser-relay-tests.md)
