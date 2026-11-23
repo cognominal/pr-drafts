@@ -86,13 +86,13 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #3 Write bytecode files to a temporary file and rename it into place
 
-- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882). **Approved** by lizmat on 2026-11-21, approved again by lizmat on 2026-11-23 (same commit 5b8779a). Mergeable, not merged yet (checked 2026-11-23). cognominal is a Raku org member, so may be able to merge it directly.
+- **Status:** submitted 2026-11-21 as [Raku/nqp#882](https://github.com/Raku/nqp/pull/882). **Approved** by lizmat on 2026-11-21, approved again by lizmat on 2026-11-23 (same commit 5b8779a). At 17:59 the same day lizmat pushed a second commit to the PR branch, 1578b1590 "Change temporary file naming to use current time": the temp name becomes `$filename.tmp-` ~ `nqp::time()` instead of `nqp::getpid()`, "to avoid issues with maybe in the future having two threads writing bytecode files at the same time". Mergeable, not merged yet (checked 2026-11-23). cognominal's local branch is now one commit behind `cognominal/nqp`. cognominal is a Raku org member, so may be able to merge it directly.
 - **Discussion:** the rest of the thread is off topic: lizmat offered the name "srak" (srak.rocks) for a Raku shell, and pointed out that [`App::Rak`](https://raku.land/zef:lizmat/App::Rak) already installs a `rak` executable, a name clash for the rak project (R1).
 - **Branch:** `atomic-mbc-write` in `~/git/cognominal---nqp`, 1 commit (5b8779a8f) on `upstream/main` 5397dd7da (Raku/nqp), pushed to `cognominal/nqp`
 - **Patch:** [`nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch`](nqp/0001-Write-bytecode-files-to-a-temporary-file-and-rename-.patch)
 - **PR body:** [`nqp/pr-atomic-mbc-write.md`](nqp/pr-atomic-mbc-write.md)
 - **Depends on:** nothing
-- **What:** `src/vm/moar/QAST/QASTCompilerMAST.nqp`, `assemble_to_file`. Rebuilding truncated `.moarvm` files that running processes had memory-mapped, which caused SIGBUS. The writer now writes `$filename.tmp-$pid` and renames it over the target.
+- **What:** `src/vm/moar/QAST/QASTCompilerMAST.nqp`, `assemble_to_file`. Rebuilding truncated `.moarvm` files that running processes had memory-mapped, which caused SIGBUS. The writer now writes `$filename.tmp-$pid` (`.tmp-<nqp::time>` after lizmat's follow-up commit) and renames it over the target.
 - **Tested:**
   - recompiling gives the output a new inode, leaves no temp file, and the output runs
   - NQP `make test`: 150 files, 13746 tests, all pass
