@@ -264,7 +264,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 | # | Repo | Kind | Topic | Status |
 |---|---|---|---|---|
 | R1 | rak | [issue](https://github.com/cognominal/rak/issues/1) | irak feedback | WIP |
-| R2 | LineEditor | PR | on-finish | tested |
+| R2 | LineEditor | [PR](https://github.com/japhb/Terminal-LineEditor/pull/15) | on-finish | submitted |
 
 ### R1 [RFE] in irak add feedback before submission
 
@@ -284,8 +284,8 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
 
 ### R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries
 
-- **Status:** tested, unsubmitted
-- **Branch:** `on-finish` in `~/git/japhb---Terminal-LineEditor`, 2 commits (371eff6, 2f97d14) on 97fa744 (release 0.0.23, japhb/Terminal-LineEditor). Not pushed anywhere: a fork is needed to submit.
+- **Status:** submitted 2026-11-23 as [japhb/Terminal-LineEditor#15](https://github.com/japhb/Terminal-LineEditor/pull/15)
+- **Branch:** `on-finish` in `~/git/japhb---Terminal-LineEditor`, 2 commits (371eff6, 2f97d14) on 97fa744 (release 0.0.23, still upstream `main`). Pushed to the fork [cognominal/Terminal-LineEditor](https://github.com/cognominal/Terminal-LineEditor/tree/on-finish) (remote `fork`).
 - **Patches:** [`terminal-lineeditor/0001-Time-out-terminal-queries-in-read-input.patch`](terminal-lineeditor/0001-Time-out-terminal-queries-in-read-input.patch), [`terminal-lineeditor/0002-Add-an-on-finish-callback-to-read-input-and-prompt.patch`](terminal-lineeditor/0002-Add-an-on-finish-callback-to-read-input-and-prompt.patch)
 - **PR body:** [`terminal-lineeditor/pr-on-finish.md`](terminal-lineeditor/pr-on-finish.md)
 - **Depends on:** nothing
@@ -294,7 +294,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - `read-input` and `prompt` take `:&on-finish`, called with the buffer on Enter: `True` finishes, a string replaces the buffer and keeps editing, a false value keeps editing.
   - The cursor-position and screen-size queries are sent together and time out after `$.query-timeout` (1 s), falling back to column 1 and 80 columns. A terminal that never answered hung the prompt.
 - **Tested:** the module's own tests pass; irak uses both changes (see R1).
-- **To submit:** fork japhb/Terminal-LineEditor, push `on-finish`, open the PR with the body above. The two commits are independent and could be split into two PRs.
+- **Submitted:** as one PR with both commits. They are independent, so they can still be split if the maintainer asks.
 
 ---
 
