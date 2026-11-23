@@ -114,7 +114,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #4 Issue: closing a Proc's `.out` early buffers the rest of the output without limit
 
-- **Status:** filed 2026-11-21 as [rakudo/rakudo#6951](https://github.com/rakudo/rakudo/issues/6951). Open, no comment yet (checked 2026-11-23). No PR: the fix needs a design decision first.
+- **Status:** filed 2026-11-21 as [rakudo/rakudo#6951](https://github.com/rakudo/rakudo/issues/6951). Open, no comment, label or assignee yet (checked 2026-11-23; the only timeline event is the cross-reference from this repo's commit db22cb1). No PR: the fix needs a design decision first.
 - **Draft:** [`rakudo/issue-proc-out-close-oom.md`](rakudo/issue-proc-out-close-oom.md)
 - **Depends on:** nothing to file it. The likely fix (close the read end so the producer gets SIGPIPE) would need a new MoarVM operation to close one output pipe of a running process: a follow-up MoarVM PR that doesn't exist yet.
 - **What:** `run 'yes', :out` then `.out.close` never returns and memory grows until the OOM killer steps in. Output piles up in MoarVM's read queue (Rakudo grants unlimited read permits) and in `Proc`'s `Channel`.
