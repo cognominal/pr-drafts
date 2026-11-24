@@ -42,7 +42,7 @@ An hourly check, [`tools/watch.sh`](tools/watch.sh), looks at every PR and issue
 
 # MoarVM crash investigation: issues and PRs
 
-Status as of 2026-11-23 (checked on GitHub). #1, #3 and #4 are submitted, none merged yet; #3 is approved; #2 waits for #1 to be merged. Each body links back here and to rak.
+Status as of 2026-11-24 (checked on GitHub). #1 and #3 are merged, and Rakudo main carries both; #4 is filed; #2 is ready to submit. Each body links back here and to rak.
 
 **Claude session:** `c931c668-6e04-4d17-8ea8-8a92fadb9e27`. Resume it with `cd ~/git/cognominal---moarvm && claude --resume c931c668-6e04-4d17-8ea8-8a92fadb9e27`; transcript in `~/.claude/projects/-home-cog-git-cognominal---moarvm/c931c668-6e04-4d17-8ea8-8a92fadb9e27.jsonl`.
 
@@ -54,8 +54,8 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 | # | Repo | Kind | Fixes | Status | Needs |
 |---|---|---|---|---|---|
-| 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | approved | merge |
-| 2 | roast | PR | test for #1 | tested | #1 merged |
+| 1 | MoarVM | [PR](https://github.com/MoarVM/MoarVM/pull/2087) | 4 × SIGABRT | merged | — |
+| 2 | roast | PR | test for #1 | tested | submit |
 | 3 | NQP | [PR](https://github.com/Raku/nqp/pull/882) | 2 × SIGBUS, SIGSEGV | merged | — |
 | 4 | Rakudo | [issue](https://github.com/rakudo/rakudo/issues/6951) | OOM | filed | — |
 | 5 | — | crash | SIGSEGV | diagnosed | #3 merged |
@@ -68,7 +68,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 
 ### #1 Close a bound stdin through libuv, not behind its back
 
-- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087). Open, not merged. lizmat commented "Thanks!" on 2026-11-21 and **approved** it on 2026-11-23 at 19:36, without comment. Not merged yet (checked 2026-11-23).
+- **Status:** submitted 2026-11-21 as [MoarVM/MoarVM#2087](https://github.com/MoarVM/MoarVM/pull/2087). lizmat commented "Thanks!" on 2026-11-21 and **approved** it on 2026-11-23 at 19:36, without comment. **Merged** by lizmat on 2026-11-24 at 13:01 UTC (merge commit fbae51aca, `2026.11-21-gfbae51aca`), no further comment. Within minutes lizmat bumped it down the chain: NQP 5fbb82e9ab "Bump MoarVM for bound stdin close fix, cognominal++" (13:03, MOAR_REVISION 2026.11-21-gfbae51aca), then Rakudo 8e36510f59 "Bump NQP for bound stdin close fix, cognominal++" (13:18, NQP_REVISION 2026.11-12-g5fbb82e9a). Not yet in a Rakudo release; the `rak` branch still has the older NQP/MoarVM.
 - **Branch:** `fix-bind-stdin-close` in `~/git/cognominal---moarvm`, 1 commit (94401a2a9) on `upstream/main` 5249be7aa (MoarVM/MoarVM), pushed to `cognominal/MoarVM-hamt`
 - **Patch:** [`moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch`](moarvm/0001-Close-a-bound-stdin-through-libuv-not-behind-its-bac.patch)
 - **PR body:** [`moarvm/pr-fix-bind-stdin-close.md`](moarvm/pr-fix-bind-stdin-close.md)
@@ -80,7 +80,7 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
   - roast test #2: fails on Rakudo Star 2026.08, passes 5/5 with the fix
   - rakudo#3057 fd-leak check unchanged
   - roast `S17-procasync/*`, `S32-io/pipe.t`, `S29-os/system.t`: same results before and after
-- **Next:** wait for a MoarVM committer to merge #2087; once merged, submit #2.
+- **Next:** submit #2 (roast); optionally bump the `rak` branch's NQP to 2026.11-12-g5fbb82e9a to pick up the fix.
 
 ## NQP
 
@@ -108,9 +108,9 @@ Status values: **WIP** (work in progress) · **tested** (fix written and verifie
 - **Branch:** `bind-stdin-tap-after-exit` in `~/git/cognominal---roast`, 1 commit (1e6f0c19e) on `upstream/master` 7639d08 (Raku/roast)
 - **Patch:** [`roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch`](roast/0001-Test-tapping-a-stdout-after-the-process-bound-to-it-.patch)
 - **PR body:** [`roast/pr-bind-stdin-tap-after-exit.md`](roast/pr-bind-stdin-tap-after-exit.md)
-- **Depends on:** #1 merged and in a Rakudo release. Otherwise the test fails, as it does on Rakudo Star 2026.08.
+- **Depends on:** #1, merged 2026-11-24 and in Rakudo main since 8e36510f59; not in a release yet. On older Rakudos the test fails, as it does on Rakudo Star 2026.08.
 - **What:** adds test 18 to `S17-procasync/bind-handles.t`. It runs in a subprocess, so an abort fails one test instead of killing the file.
-- **To submit:** push the branch to your roast fork, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, which references MoarVM/MoarVM#2087. Submit after #1.
+- **To submit:** push the branch to your roast fork, open the PR against `Raku/roast` `master` with `roast/pr-bind-stdin-tap-after-exit.md`, which references MoarVM/MoarVM#2087. #1 is merged, so it can go now; check the test passes on a Rakudo main build first.
 
 ## Rakudo
 
@@ -164,7 +164,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 1. ~~Submit #1 (MoarVM) and #3 (NQP)~~ done: MoarVM#2087, nqp#882.
 2. ~~File #4 (Rakudo issue)~~ done: rakudo#6951.
-3. Submit #2 (roast) once #1 is merged.
+3. Submit #2 (roast): #1 merged 2026-11-24, so it is ready.
 4. Update the status column here as each one is submitted and accepted.
 
 ---

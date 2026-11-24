@@ -26,7 +26,7 @@ This is a regression test for [MoarVM/MoarVM#2087](https://github.com/MoarVM/Moa
 
 **Door:** two-way
 
-**Blast Radius:** tests-only. It fails on Rakudo releases without the MoarVM fix, so merge it after MoarVM/MoarVM#2087.
+**Blast Radius:** tests-only. It fails on Rakudo releases without the MoarVM fix, but MoarVM/MoarVM#2087 is merged and Rakudo main has had it since 8e36510f59.
 
 ## Context
 
