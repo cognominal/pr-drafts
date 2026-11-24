@@ -171,7 +171,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 # tuios: hover help (newhelp)
 
-Status as of 2026-11-21. **Nothing has been pushed, submitted or posted.**
+Status as of 2026-11-24. **All four are submitted as draft PRs** against `main`, from branches pushed to [cognominal/tuios](https://github.com/cognominal/tuios): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The stack merged cleanly into `main` at 58 commits past its base (checked with `git merge-tree`, not rebased or retested).
 
 **Trigger:** my own feature work on tuios: bringing Gaurav-Gosain/tuios#1859 (help mode) up to date.
 
@@ -179,18 +179,18 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 
 **Claude session:** `25d34f6d-d9d7-4dfb-bf4a-f84f83552d81`. Resume it with `cd ~/git/Gaurav-Gosain---tuios && claude --resume 25d34f6d-d9d7-4dfb-bf4a-f84f83552d81`; transcript in `~/.claude/projects/-home-cog-git-Gaurav-Gosain---tuios/25d34f6d-d9d7-4dfb-bf4a-f84f83552d81.jsonl`.
 
-| # | What | Status | Needs |
+| # | What | PR | Needs |
 |---|---|---|---|
-| T1 | engine, dock, desktop | tested | main |
-| T2 | rail and panes | tested | T1 |
-| T3 | aside for leader menu | tested | T2 |
-| T4 | `?` control on the dock | tested | T3 |
+| T1 | engine, dock, desktop | #2445 | main |
+| T2 | rail and panes | #2446 | T1 |
+| T3 | aside for leader menu | #2447 | T2 |
+| T4 | `?` control on the dock | #2448 | T3 |
 
-None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are `feat/newhelp-N-<topic>`.
+All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Branches are `feat/newhelp-N-<topic>`.
 
 ### T1 Hover help explains the dock and the desktop
 
-- **Status:** tested, unsubmitted
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445) (2026-11-24), branch `feat/newhelp-1-engine` pushed to `cognominal/tuios`
 - **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then ee501bdbe, on origin/main 4c12ece99
 - **Patches:** [`tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`](tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch), [`tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch)
 - **PR body:** [`tuios/pr1-engine.md`](tuios/pr1-engine.md)
@@ -200,14 +200,11 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - the unit tests of config, input, app and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
   - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. Main had 84,096 B of room on Windows, so the first commit raises the ceiling to 50,500,000 B (your decision, 2026-11-20). `just size` passes, with 477,088 B left on windows/amd64.
-- **To submit:**
-  1. Push the branch to your fork.
-  2. Open the PR against `Gaurav-Gosain/tuios` `main` with `tuios/pr1-engine.md`, marked ready only after `just check --changed`.
-  3. The maintainer lands it with the `full-suite` label.
+- **Next:** mark it ready for review with `gh pr ready 2445 -R Gaurav-Gosain/tuios` once `just check --changed` passes on a rebase onto current `main`; the maintainer lands it with the `full-suite` label.
 
 ### T2 Hover help explains the rail and the panes
 
-- **Status:** tested, unsubmitted
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446) (2026-11-24), branch `feat/newhelp-2-rail-panes` pushed to `cognominal/tuios`
 - **Commit:** 50cbf5143 on T1 ee501bdbe
 - **Patch:** [`tuios/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`](tuios/0003-feat-hover-help-explains-the-rail-and-the-panes.patch)
 - **PR body:** [`tuios/pr2-rail-panes.md`](tuios/pr2-rail-panes.md)
@@ -219,11 +216,11 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - `TestIdleCostStaysLow` passes
   - size against T1: +24,576 B on linux/amd64, +27,648 B on windows/amd64, 449,440 B under the new ceiling
   - 2026-11-21: fixed after your manual test. A rail section's explainer covered the rest of the rail; it now goes beside the rail. The rail test checks it, and fails on the old build
-- **To submit:** after T1 is open, push the branch and open the PR with `tuios/pr2-rail-panes.md`, replacing `#T1` with T1's number.
+- **Next:** mark it ready for review with `gh pr ready 2446 -R Gaurav-Gosain/tuios` after #2445.
 
 ### T3 Hover help stands aside for the leader menu
 
-- **Status:** tested, unsubmitted
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447) (2026-11-24), branch `feat/newhelp-3-leader` pushed to `cognominal/tuios`
 - **Commit:** 5dfbf0ef8 on T2 50cbf5143
 - **Patch:** [`tuios/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch`](tuios/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch)
 - **PR body:** [`tuios/pr3-leader.md`](tuios/pr3-leader.md)
@@ -233,11 +230,11 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - `just check --changed` green
   - `TestIdleCostStaysLow` passes, renders=0
   - size: +0 B on all three targets
-- **To submit:** after T2 is open, push the branch and open the PR with `tuios/pr3-leader.md`, replacing `#T2`.
+- **Next:** mark it ready for review with `gh pr ready 2447 -R Gaurav-Gosain/tuios` after #2446.
 
 ### T4 An opt-in ? control on the dock
 
-- **Status:** tested, unsubmitted
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`
 - **Commit:** 13f751c95 on T3 5dfbf0ef8
 - **Patch:** [`tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`](tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch)
 - **PR body:** [`tuios/pr4-dock-control.md`](tuios/pr4-dock-control.md)
@@ -248,7 +245,7 @@ None is submitted yet. T1 also raises the size ceiling to 50.5 MB. Branches are 
   - the unit tests of config, app, input and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
   - size at the head: 49,619,104 B linux/amd64, 50,053,120 B windows/amd64 (446,880 B under the ceiling)
-- **To submit:** after T3 is open, push the branch and open the PR with `tuios/pr4-dock-control.md`, replacing `#T3`.
+- **Next:** mark it ready for review with `gh pr ready 2448 -R Gaurav-Gosain/tuios` after #2447.
 
 ---
 

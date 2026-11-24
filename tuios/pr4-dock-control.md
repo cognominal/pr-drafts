@@ -1,4 +1,4 @@
-Stacked on #T3 (feat/newhelp-3-leader). Review that first.
+Stacked on #2447 (feat/newhelp-3-leader). Review that first.
 
 ## Summary
 

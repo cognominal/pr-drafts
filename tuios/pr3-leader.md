@@ -1,4 +1,4 @@
-Stacked on #T2 (feat/newhelp-2-rail-panes). Review that first.
+Stacked on #2446 (feat/newhelp-2-rail-panes). Review that first.
 
 ## Summary
 
