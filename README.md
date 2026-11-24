@@ -191,6 +191,7 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
 ### T1 Hover help explains the dock and the desktop
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445) (2026-11-24), branch `feat/newhelp-1-engine` pushed to `cognominal/tuios`
+- **Activity:** 2026-11-24, I commented that the four PRs are drafts so people can look at them before they go stale, and that they are smaller than my earlier attempt (#1859) to fit Gaurav's directives. No review yet. Only the GitGuardian check runs on T1–T4; it passes.
 - **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then ee501bdbe, on origin/main 4c12ece99
 - **Patches:** [`tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`](tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch), [`tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch)
 - **PR body:** [`tuios/pr1-engine.md`](tuios/pr1-engine.md)
