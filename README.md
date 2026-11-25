@@ -262,7 +262,8 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - size at the head: 49,619,104 B linux/amd64, 50,053,632 B windows/amd64 (446,368 B under the ceiling; the fixes cost 512 B on Windows)
   - `just check --changed` at the head, 2026-11-25: green. lint first failed when `/tmp` hit its quota and passed on rerun
   - one `cmd/tuios` run failed with "unknown option: -X"; four reruns passed, cause not found
-- **Next:** force-push the four branches (`git push --force-with-lease` each) and answer the review with the three fixes above. Then mark the four ready for review.
+- **Reply to the review:** [`tuios/reply-2448-review.md`](tuios/reply-2448-review.md), not posted
+- **Next:** force-push the four branches to `fork`, update the four PR bodies from the `pr*.md` files, and post the reply on #2448. Then mark the four ready for review.
 
 ---
 
