@@ -171,7 +171,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 # tuios: hover help (newhelp)
 
-Status as of 2026-11-24. **All four are submitted as draft PRs** against `main`, from branches pushed to [cognominal/tuios](https://github.com/cognominal/tuios): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The stack merged cleanly into `main` at 58 commits past its base (checked with `git merge-tree`, not rebased or retested).
+Status as of 2026-11-25. **Changes requested:** Gaurav reviewed the whole stack on #2448 and asked for three fixes, all in T1's code (see T4 below); he will land the four together once they are in. **All four are submitted as draft PRs** against `main`, from branches pushed to [cognominal/tuios](https://github.com/cognominal/tuios): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The stack merged cleanly into `main` at 58 commits past its base (checked with `git merge-tree`, not rebased or retested).
 
 **Trigger:** my own feature work on tuios: bringing Gaurav-Gosain/tuios#1859 (help mode) up to date.
 
@@ -235,7 +235,11 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
 
 ### T4 An opt-in ? control on the dock
 
-- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`; changes requested 2026-11-25
+- **Activity:** 2026-11-25, Gaurav [reviewed the whole stack](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7160295455) here. He likes the direction and will land the four together once three things are fixed. All three are in T1's commit ee501bdbe:
+  1. `internal/app/render_dock.go:556-562`: CPU and RAM hover hits are off by the 2-column `MarginRight` of `sysInfoStyle` (each part is measured with the margin, the joined segment carries it once). Measure the parts without the margin.
+  2. `internal/config/help_actions.go:24-31` with `internal/input/handler.go:441-445`: the default help keys shadow tuios keys, since `hoverHelpKey` runs first. With hover help on, shift+up/down/pgup/pgdown stop scrolling in terminal mode, shift+left/right stop word moves in copy mode, and the rail's reorder keys likely go too. Skip the help keys in copy mode and rail focus, or pick unbound defaults; he would like the reachability test to check cross-section shadowing.
+  3. `internal/app/hover_help.go:228-239`: `helpSmallestAt` ignores stacking order, so with floating panes a hidden smaller pane wins. Prefer the topmost pane (`WindowAt`, by `HitZ`), then the smallest part inside it.
 - **Commit:** 13f751c95 on T3 5dfbf0ef8
 - **Patch:** [`tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`](tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch)
 - **PR body:** [`tuios/pr4-dock-control.md`](tuios/pr4-dock-control.md)
@@ -246,7 +250,7 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - the unit tests of config, app, input and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
   - size at the head: 49,619,104 B linux/amd64, 50,053,120 B windows/amd64 (446,880 B under the ceiling)
-- **Next:** mark it ready for review with `gh pr ready 2448 -R Gaurav-Gosain/tuios` after #2447.
+- **Next:** fix the three review points in T1 (ee501bdbe), with tests that fail before the fix, rebase T2–T4 on it, force-push the four branches, regenerate the patches here, and answer the review. Then mark the four ready for review.
 
 ---
 
