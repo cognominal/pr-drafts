@@ -1,7 +1,7 @@
-From f41e230df4ec99863933e703f3224aee68899800 Mon Sep 17 00:00:00 2001
+From 4731e93d5199b80112b6b9fd84095b390c57bbcb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 23:30:21 +0100
-Subject: [PATCH 3/5] feat: hover help explains the rail and the panes
+Subject: [PATCH 2/4] feat: hover help explains the rail and the panes
 
 Hover help now explains the rail, one part per section the last frame
 drew, and every pane on the workspace, with its title bar and its body
@@ -20,22 +20,21 @@ and the panes sit between the dock and the desktop.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- e2e/tui/NEGATIVE_CONTROLS.md     |  16 ++
+ e2e/tui/NEGATIVE_CONTROLS.md     |  15 ++
  e2e/tui/hover_help_test.go       | 166 ++++++++++++++++-
  internal/app/hover_help.go       |  65 +++++--
  internal/app/hover_help_parts.go | 306 +++++++++++++++++++++++++++++++
- 4 files changed, 532 insertions(+), 21 deletions(-)
+ 4 files changed, 531 insertions(+), 21 deletions(-)
  create mode 100644 internal/app/hover_help_parts.go
 
 diff --git a/e2e/tui/NEGATIVE_CONTROLS.md b/e2e/tui/NEGATIVE_CONTROLS.md
-index 437dd742f..f9017dbe2 100644
+index b1465038b..28411fffe 100644
 --- a/e2e/tui/NEGATIVE_CONTROLS.md
 +++ b/e2e/tui/NEGATIVE_CONTROLS.md
-@@ -18586,3 +18586,19 @@ Run on 2026-11-19 on Linux, sim backend, against main at 61507834e. The control
- TUIOS_E2E=1 TUIOS_E2E_BACKEND=sim TUIOS_E2E_BIN=/path/to/tuios \
-   go test -count=1 -v -run '^(TestScreenshotRegionDragOpensThePreview|TestScreenshotTwoCapturesInOneSecondKeepBothFiles)$' .
- ```
-+
+@@ -19731,3 +19731,18 @@ placeholders, and zooms, drags and fits the picture.
+ 
+ Repeat from `e2e/tui` with
+ `TUIOS_E2E=1 TUIOS_E2E_BIN=/path/to/tuios go test -count=1 -run '^TestCockpitImageViewZooms$' -v .`.
 +## Hover help: the meters and the pane on top
 +
 +Two fixes from the review of the hover help pull requests. The CPU and RAM readouts share one dock segment, and each recorded its columns with the segment's two-column margin counted in, so the first two columns of the RAM readout explained the CPU. The pointer picked the part with the smallest rectangle under it, so a pane hidden under a larger floating pane or popup was explained through it.

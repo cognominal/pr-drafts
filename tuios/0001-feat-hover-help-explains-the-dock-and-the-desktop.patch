@@ -1,7 +1,7 @@
-From a49e8b84f4d9fc8fd2a464be6850aa190ba16369 Mon Sep 17 00:00:00 2001
+From a28c8d4d276bbb600118977231ebc39946d24b9c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 22:59:18 +0100
-Subject: [PATCH 2/5] feat: hover help explains the dock and the desktop
+Subject: [PATCH 1/4] feat: hover help explains the dock and the desktop
 
 Ctrl+b h (toggle_hover_help) turns on hover help, and Ctrl+b h turns it
 off. The explainer is a borderless overlay on the theme's panel ground,
@@ -63,10 +63,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  create mode 100644 internal/input/hover_help.go
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 7e654cffe..54935a791 100644
+index 2e6cc8598..1d8313937 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -914,6 +914,50 @@ the text into the focused pane. This action has no default key. Bind it, or
+@@ -946,6 +946,50 @@ the text into the focused pane. This action has no default key. Bind it, or
  run it from the command palette. Set `hints.all_panes = true` to make
  `Ctrl+B F` do the same.
  
@@ -118,10 +118,10 @@ index 7e654cffe..54935a791 100644
  
  `Ctrl+click` on a link opens it. `Shift+click` also opens it, but most
 diff --git a/docs/keybindings-defaults.md b/docs/keybindings-defaults.md
-index c7020edef..0d513f447 100644
+index 7293ca65a..982ae0868 100644
 --- a/docs/keybindings-defaults.md
 +++ b/docs/keybindings-defaults.md
-@@ -402,6 +402,18 @@ Run `tuios keybinds list` to see the keys that your config sets.
+@@ -412,6 +412,18 @@ Run `tuios keybinds list` to see the keys that your config sets.
  | `D` | `review_unstage_file` | Review: unstage the whole file |
  | `d` | `review_unstage_hunk` | Review: unstage the hunk under the cursor |
  
@@ -140,7 +140,7 @@ index c7020edef..0d513f447 100644
  ## Prefix (ctrl+b)
  
  | Keys | Action | Description |
-@@ -482,6 +494,7 @@ Run `tuios keybinds list` to see the keys that your config sets.
+@@ -492,6 +504,7 @@ Run `tuios keybinds list` to see the keys that your config sets.
  | `ctrl+b right` | `terminal_focus_right` | Focus the pane to the right |
  | `ctrl+b Z` | `toggle_calm` | Calm mode |
  | `ctrl+b ?` | `toggle_help` | Toggle help |
@@ -1502,10 +1502,10 @@ index 000000000..ea2b71cab
 +	return clamp(cx, anchor.Max.Y+gap)
 +}
 diff --git a/internal/app/os.go b/internal/app/os.go
-index eaed9c331..bcbec89b9 100644
+index 99b9a2119..6d85893dd 100644
 --- a/internal/app/os.go
 +++ b/internal/app/os.go
-@@ -466,14 +466,21 @@ type OS struct {
+@@ -470,14 +470,21 @@ type OS struct {
  	notifDrawn             notifDrawn                    // what the last frame showed of the live message
  	dockSessionHover       DockSessionAction             // which session control the pointer is on, DockSessionNone for neither
  	dockCustomHits         []dockCustomHit               // where the custom components were drawn last frame
@@ -1536,7 +1536,7 @@ index eaed9c331..bcbec89b9 100644
  	// the hosts that cannot Send into the program directly. See dock_remote.go.
  	RemoteCommandChan chan RemoteCommandMsg
 diff --git a/internal/app/program_options.go b/internal/app/program_options.go
-index ff543421d..7f9ba359e 100644
+index de7325a63..d5029d37a 100644
 --- a/internal/app/program_options.go
 +++ b/internal/app/program_options.go
 @@ -280,6 +280,12 @@ func FilterMouseMotion(model tea.Model, msg tea.Msg) tea.Msg {
@@ -1553,10 +1553,10 @@ index ff543421d..7f9ba359e 100644
  	// off bare motion. This filter is a whitelist, so the gesture is dead until
  	// it has a clause here however well the detector works.
 diff --git a/internal/app/render.go b/internal/app/render.go
-index c243ae7c5..e74c1264f 100644
+index a501bcbcf..81044da05 100644
 --- a/internal/app/render.go
 +++ b/internal/app/render.go
-@@ -417,6 +417,12 @@ func (m *OS) GetCanvas(render bool) *frameCanvas {
+@@ -421,6 +421,12 @@ func (m *OS) GetCanvas(render bool) *frameCanvas {
  			layers = append(layers, dockLayer)
  		}
  
@@ -1650,10 +1650,10 @@ index cd24d1e22..4ad5a43a7 100644
  	m.dockOverflowHit = dockOverflowHit{}
  	if overflowX1 > overflowX0 {
 diff --git a/internal/config/actions.go b/internal/config/actions.go
-index 70c3244b8..4c921603b 100644
+index 7a7b9091f..998998b1d 100644
 --- a/internal/config/actions.go
 +++ b/internal/config/actions.go
-@@ -121,6 +121,15 @@ var actionTable = [...]ActionSpec{
+@@ -127,6 +127,15 @@ var actionTable = [...]ActionSpec{
  	{Name: "transfers_clear", Desc: "Copies: remove the copies that ended", Run: RunView},
  	{Name: "transfers_answer", Desc: "Copies: answer a copy that waits for an answer", Run: RunView},
  	{Name: "transfers_close", Desc: "Copies: close the panel", Run: RunView},
@@ -1669,7 +1669,7 @@ index 70c3244b8..4c921603b 100644
  
  	{Name: "list_up", Desc: "Lists: up one row", Run: RunView},
  	{Name: "list_down", Desc: "Lists: down one row", Run: RunView},
-@@ -349,6 +358,7 @@ var actionTable = [...]ActionSpec{
+@@ -356,6 +365,7 @@ var actionTable = [...]ActionSpec{
  	{Name: "enter_window_mode", Desc: "Enter window management mode"},
  	{Name: "hold_window_mode", Desc: "Hold for window management mode", Run: RunView},
  	{Name: "toggle_help", Desc: "Toggle help", Mobile: MobileButton{Label: "help", Order: 11}, Aliases: []Action{"prefix_help"}},
@@ -1848,10 +1848,10 @@ index c875df600..710f9d5c6 100644
  	case ScopeGUI:
  		// Only the GUI reads these keys. A terminal's help that listed
 diff --git a/internal/config/userconfig.go b/internal/config/userconfig.go
-index fe3303967..fd7111ff9 100644
+index 02ce1fb34..6b8186188 100644
 --- a/internal/config/userconfig.go
 +++ b/internal/config/userconfig.go
-@@ -1295,6 +1295,10 @@ type KeybindingsConfig struct {
+@@ -1306,6 +1306,10 @@ type KeybindingsConfig struct {
  	// Review binds are live while the review overlay is open and no note is
  	// being typed: its hunk and file motions. See getDefaultReviewKeybinds.
  	Review map[string][]string `toml:"review"`
@@ -1862,7 +1862,7 @@ index fe3303967..fd7111ff9 100644
  	// GUI binds are read only by a native GUI client (tuios-gpui), through
  	// the GUI bridge's keybinds event. They are desktop chords that need no
  	// leader, such as ctrl+shift+t. The terminal client never looks them up,
-@@ -1741,6 +1745,9 @@ func DefaultConfig() *UserConfig {
+@@ -1752,6 +1756,9 @@ func DefaultConfig() *UserConfig {
  				// makes a window and t is the window prefix. y is the key the
  				// multifocus docs tell people to bind, so it stays free.
  				"prefix_transfers": {"u"},
@@ -1872,7 +1872,7 @@ index fe3303967..fd7111ff9 100644
  				// E opens the scrollback in the editor, one shift from the e
  				// that focuses the rail. Copy mode has it on ctrl+g.
  				ActionEditScrollback: {"E"},
-@@ -1866,6 +1873,7 @@ func DefaultConfig() *UserConfig {
+@@ -1877,6 +1884,7 @@ func DefaultConfig() *UserConfig {
  			Transfers:       getDefaultTransfersKeybinds(),
  			CopyMode:        getDefaultCopyModeKeybinds(),
  			Review:          getDefaultReviewKeybinds(),
@@ -1880,7 +1880,7 @@ index fe3303967..fd7111ff9 100644
  			GUI:             getDefaultGUIKeybinds(),
  			Global: map[string][]string{
  				// ctrl+p is fish's history-back and vim's keyword completion, and
-@@ -3855,6 +3863,8 @@ func fillMissingKeybinds(cfg, defaultCfg *UserConfig) {
+@@ -3890,6 +3898,8 @@ func fillMissingKeybinds(cfg, defaultCfg *UserConfig) {
  	fillMapDefaults(cfg.Keybindings.CopyMode, defaultCfg.Keybindings.CopyMode)
  	// The review overlay's section is newer than every config written before it.
  	fillMapDefaults(cfg.Keybindings.Review, defaultCfg.Keybindings.Review)
@@ -1889,7 +1889,7 @@ index fe3303967..fd7111ff9 100644
  	// The GUI section is newer than every config written before it.
  	fillMapDefaults(cfg.Keybindings.GUI, defaultCfg.Keybindings.GUI)
  
-@@ -3918,6 +3928,8 @@ var yieldingDefaults = map[string]bool{
+@@ -3953,6 +3963,8 @@ var yieldingDefaults = map[string]bool{
  	// between machines.
  	"prefix_transfers": true,
  	"file_send":        true,
@@ -1911,7 +1911,7 @@ index bf1be5e99..57c6dc45d 100644
  
  // leaderAgentRows is the leader menu's Agents section.
 diff --git a/internal/input/actions.go b/internal/input/actions.go
-index c1c7b4a2a..0d0c00469 100644
+index 2d639ab4a..b66d50da1 100644
 --- a/internal/input/actions.go
 +++ b/internal/input/actions.go
 @@ -212,6 +212,7 @@ func (d *ActionDispatcher) registerHandlers() {
@@ -2033,7 +2033,7 @@ index 000000000..b8eacfe60
 +	return true
 +}
 diff --git a/internal/input/reachability_test.go b/internal/input/reachability_test.go
-index 0ce4ca97e..462c44037 100644
+index 0e3c44890..3e73cb11e 100644
 --- a/internal/input/reachability_test.go
 +++ b/internal/input/reachability_test.go
 @@ -168,9 +168,21 @@ func reachSections(t *testing.T) []bindingSection {
@@ -2099,7 +2099,7 @@ index 0ce4ca97e..462c44037 100644
  						o.Mode = mode
  						if sec.leader {
  							o = pressKey(t, o, k.LeaderKey)
-@@ -890,7 +927,7 @@ func TestEveryDescribedActionIsHandled(t *testing.T) {
+@@ -891,7 +928,7 @@ func TestEveryDescribedActionIsHandled(t *testing.T) {
  	// below does not name it; runCopyModeAction runs it through its constant.
  	handled := map[string]bool{app.HoldModeAction: true, config.ActionCopyModeFirstNonBlank: true}
  	k := config.DefaultConfig().Keybindings

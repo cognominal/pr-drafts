@@ -1,7 +1,7 @@
-From ad1230b261fc38bfa237739daadb98a094a56981 Mon Sep 17 00:00:00 2001
+From b13e1f2cf7a07ceaa1ee2d492a52693f26e988af Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Sat, 21 Nov 2026 00:42:48 +0100
-Subject: [PATCH 4/5] feat: hover help stands aside for the leader menu
+Subject: [PATCH 3/4] feat: hover help stands aside for the leader menu
 
 While the leader or one of its menus waits for a key, the explainer is
 not drawn: the menu is the next thing read, and two overlays on one
@@ -17,10 +17,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  3 files changed, 47 insertions(+), 5 deletions(-)
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 54935a791..d5c37d35d 100644
+index 1d8313937..8e2c1203e 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -945,7 +945,9 @@ mode and reorder the rail. Some host terminals and desktops keep `Ctrl+Alt`
+@@ -977,7 +977,9 @@ mode and reorder the rail. Some host terminals and desktops keep `Ctrl+Alt`
  with the arrows for themselves, Ghostty on Linux among them; bind other keys
  there. A click goes to what it lands on. A
  click on the explanation does nothing. The wheel scrolls the explanation when

@@ -171,7 +171,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 # tuios: hover help (newhelp)
 
-Status as of 2026-11-25. **Review fixes pushed, waiting for Gaurav:** Gaurav reviewed the whole stack on #2448 and asked for three fixes (see T4 below); he will land the four together once they are in. All three are fixed and tested (T1 a49e8b84f, T2 f41e230df, T3 ad1230b26, T4 616ebc6c0), and the patches here are regenerated. The four branches were force-pushed to the fork on 2026-11-25, the four PR bodies were updated from the `pr*.md` files, and the review was answered in [a comment on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557). The PRs are still drafts and are not rebased onto current `main`, which is 239 commits ahead. **All four are submitted as draft PRs** against `main`, from branches pushed to [cognominal/tuios](https://github.com/cognominal/tuios): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The stack merged cleanly into `main` at 58 commits past its base (checked with `git merge-tree`, not rebased or retested).
+Status as of 2026-11-25. **Ready for review, waiting for Gaurav.** Gaurav reviewed the whole stack on #2448 and asked for three fixes (see T4 below); he will land the four together once they are in. All three are fixed and tested. The review was answered in [a comment on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557). The stack was then rebased onto main 3fd531be4 (T1 a28c8d4d2, T2 4731e93d5, T3 b13e1f2cf, T4 2e8171ba9) and the ceiling commit dropped, since main now has room for the stack. It was retested, force-pushed to [cognominal/tuios](https://github.com/cognominal/tuios), and the four PRs were marked ready for review, with [a note on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7175431671): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The patches here are regenerated from the rebased stack.
 
 **Trigger:** my own feature work on tuios: bringing Gaurav-Gosain/tuios#1859 (help mode) up to date.
 
@@ -186,14 +186,14 @@ A stacked series that redoes Gaurav-Gosain/tuios#1859 (help mode) on current mai
 | T3 | aside for leader menu | #2447 | T2 |
 | T4 | `?` control on the dock | #2448 | T3 |
 
-All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Branches are `feat/newhelp-N-<topic>`.
+All four are ready for review. After the rebase the stack fits under the 50,000,000-byte ceiling, so T1 no longer raises it (that was your decision of 2026-11-20). Branches are `feat/newhelp-N-<topic>`.
 
 ### T1 Hover help explains the dock and the desktop
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445) (2026-11-24), branch `feat/newhelp-1-engine` pushed to `cognominal/tuios`
 - **Activity:** 2026-11-24, I commented that the four PRs are drafts so people can look at them before they go stale, and that they are smaller than my earlier attempt (#1859) to fit Gaurav's directives. No review yet. Only the GitGuardian check runs on T1–T4; it passes.
-- **Commits:** 7d91c76e4 `chore: raise the binary size ceiling to 50.5 MB`, then a49e8b84f (was ee501bdbe before the review fixes; the pushed branch still has ee501bdbe), on origin/main 4c12ece99
-- **Patches:** [`tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch`](tuios/0001-chore-raise-the-binary-size-ceiling-to-50.5-MB.patch), [`tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0002-feat-hover-help-explains-the-dock-and-the-desktop.patch)
+- **Commit:** a28c8d4d2 on origin/main 3fd531be4 (rebased 2026-11-25; before: the ceiling commit 7d91c76e4, then a49e8b84f, on 4c12ece99)
+- **Patch:** [`tuios/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch)
 - **PR body:** [`tuios/pr1-engine.md`](tuios/pr1-engine.md)
 - **Tested:**
   - 8 e2e tests in `e2e/tui/hover_help_test.go`: pass on the real and sim backends, and all 8 fail on main
@@ -204,14 +204,14 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - `just check --changed` green
   - the unit tests of config, input, app and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
-  - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. Main had 84,096 B of room on Windows, so the first commit raises the ceiling to 50,500,000 B (your decision, 2026-11-20). `just size` passes, with 477,088 B left on windows/amd64.
-- **Next:** mark it ready for review with `gh pr ready 2445 -R Gaurav-Gosain/tuios` once `just check --changed` passes on a rebase onto current `main`; the maintainer lands it with the `full-suite` label.
+  - size against main 3fd531be4: +102,400 B on linux/amd64, +107,008 B on windows/amd64 (49,955,840 B, 44,160 B under the 50,000,000 B ceiling)
+- **Next:** wait for review; the maintainer lands it with the `full-suite` label.
 
 ### T2 Hover help explains the rail and the panes
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446) (2026-11-24), branch `feat/newhelp-2-rail-panes` pushed to `cognominal/tuios`
-- **Commit:** f41e230df on T1 a49e8b84f (pushed: 50cbf5143 on ee501bdbe)
-- **Patch:** [`tuios/0003-feat-hover-help-explains-the-rail-and-the-panes.patch`](tuios/0003-feat-hover-help-explains-the-rail-and-the-panes.patch)
+- **Commit:** 4731e93d5 on T1 a28c8d4d2
+- **Patch:** [`tuios/0002-feat-hover-help-explains-the-rail-and-the-panes.patch`](tuios/0002-feat-hover-help-explains-the-rail-and-the-panes.patch)
 - **PR body:** [`tuios/pr2-rail-panes.md`](tuios/pr2-rail-panes.md)
 - **Tested:**
   - 11 hover help e2e tests pass on the real and sim backends
@@ -220,15 +220,15 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - `just check --changed` green
   - the unit tests pass
   - `TestIdleCostStaysLow` passes
-  - size against T1: +24,576 B on linux/amd64, +27,648 B on windows/amd64, 449,440 B under the new ceiling
+  - size against T1: +32,768 B on linux/amd64, +27,648 B on windows/amd64, 16,512 B under the ceiling
   - 2026-11-21: fixed after your manual test. A rail section's explainer covered the rest of the rail; it now goes beside the rail. The rail test checks it, and fails on the old build
-- **Next:** mark it ready for review with `gh pr ready 2446 -R Gaurav-Gosain/tuios` after #2445.
+- **Next:** wait for review, after #2445.
 
 ### T3 Hover help stands aside for the leader menu
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447) (2026-11-24), branch `feat/newhelp-3-leader` pushed to `cognominal/tuios`
-- **Commit:** ad1230b26 on T2 f41e230df (pushed: 5dfbf0ef8 on 50cbf5143)
-- **Patch:** [`tuios/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch`](tuios/0004-feat-hover-help-stands-aside-for-the-leader-menu.patch)
+- **Commit:** b13e1f2cf on T2 4731e93d5
+- **Patch:** [`tuios/0003-feat-hover-help-stands-aside-for-the-leader-menu.patch`](tuios/0003-feat-hover-help-stands-aside-for-the-leader-menu.patch)
 - **PR body:** [`tuios/pr3-leader.md`](tuios/pr3-leader.md)
 - **Tested:**
   - 12 hover help e2e tests pass on the real and sim backends (rerun 2026-11-25 after the review fixes)
@@ -236,22 +236,22 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - `just check --changed` green
   - `TestIdleCostStaysLow` passes, renders=0
   - size: +0 B on all three targets
-- **Next:** mark it ready for review with `gh pr ready 2447 -R Gaurav-Gosain/tuios` after #2446.
+- **Next:** wait for review, after #2446.
 
 ### T4 An opt-in ? control on the dock
 
-- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`; changes requested 2026-11-25, fixed and force-pushed the same day, review answered
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`; changes requested 2026-11-25, fixed, rebased and force-pushed the same day, review answered, all four marked ready
 - **Activity:** 2026-11-25, Gaurav [reviewed the whole stack](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7160295455) here. He likes the direction and will land the four together once three things are fixed. He placed all three in T1's commit ee501bdbe, but the third is in T2's code:
   1. `internal/app/render_dock.go:556-562`: CPU and RAM hover hits are off by the 2-column `MarginRight` of `sysInfoStyle` (each part is measured with the margin, the joined segment carries it once). Measure the parts without the margin.
   2. `internal/config/help_actions.go:24-31` with `internal/input/handler.go:441-445`: the default help keys shadow tuios keys, since `hoverHelpKey` runs first. With hover help on, shift+up/down/pgup/pgdown stop scrolling in terminal mode, shift+left/right stop word moves in copy mode, and the rail's reorder keys likely go too. Skip the help keys in copy mode and rail focus, or pick unbound defaults; he would like the reachability test to check cross-section shadowing.
   3. `internal/app/hover_help.go:228-239`: `helpSmallestAt` ignores stacking order, so with floating panes a hidden smaller pane wins. Prefer the topmost pane (`WindowAt`, by `HitZ`), then the smallest part inside it.
-- **Fixes (2026-11-25, local):**
+- **Fixes (2026-11-25):**
   1. Fixed in T1, in `renderDockRightCells` (`internal/app/dock_components.go`, not `render_dock.go`): each readout is measured without the margin. `TestHoverHelpExplainsEachMeter` fails without the fix.
   2. Fixed in T1. The defaults are now ctrl+alt+arrows to walk, ctrl+alt+pgup/pgdown to scroll, and alt+shift+h, which no other table binds. Your choice of keys. `TestHoverHelpShadowsNoDefaultBinding` presses every section's defaults with hover help on. `TestDefaultHelpKeysAreBoundInNoOtherTable` checks the help defaults against every table, including the GUI client's. Each found 14 clashes on the old keys. `docs/KEYBINDINGS.md` warns that Ghostty on Linux keeps ctrl+alt+arrows.
   3. Fixed in T2. Each part has a layer: the desktop, then each pane at `HitZ`+1, then the dock and the rail. The pointer picks the highest layer, then the smallest part. `TestHoverHelpExplainsThePaneOnTop` fails without the fix.
   The negative controls are in `e2e/tui/NEGATIVE_CONTROLS.md`.
-- **Commit:** 616ebc6c0 on T3 ad1230b26 (pushed: 13f751c95 on 5dfbf0ef8)
-- **Patch:** [`tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`](tuios/0005-feat-an-opt-in-control-on-the-dock-for-hover-help.patch)
+- **Commit:** 2e8171ba9 on T3 b13e1f2cf
+- **Patch:** [`tuios/0004-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`](tuios/0004-feat-an-opt-in-control-on-the-dock-for-hover-help.patch)
 - **PR body:** [`tuios/pr4-dock-control.md`](tuios/pr4-dock-control.md)
 - **Tested:**
   - 13 hover help e2e tests pass on the real and sim backends (2026-11-25, after the fixes)
@@ -259,11 +259,13 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - `just check --changed` green
   - the unit tests of config, app, input and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
-  - size at the head: 49,619,104 B linux/amd64, 50,053,632 B windows/amd64 (446,368 B under the ceiling; the fixes cost 512 B on Windows)
+  - size at the head: 49,590,432 B linux/amd64, 49,986,048 B windows/amd64 (13,952 B under the 50,000,000 B ceiling; the fixes cost 512 B on Windows)
+  - after the rebase onto 3fd531be4 (2026-11-25): the hover help e2e tests pass at each branch on the real and sim backends (8, 11, 12 and 13), the unit tests of app, input, config, cmd/tuios, lint and skills pass, and `just check --changed` and `just size` pass at the head
   - `just check --changed` at the head, 2026-11-25: green. lint first failed when `/tmp` hit its quota and passed on rerun
   - one `cmd/tuios` run failed with "unknown option: -X"; four reruns passed, cause not found
 - **Reply to the review:** [`tuios/reply-2448-review.md`](tuios/reply-2448-review.md), [posted](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557) 2026-11-25
-- **Next:** wait for Gaurav's answer. Before landing, rebase the stack onto `main` (`git rebase --update-refs`), rerun the tests and `just check --changed`, and force-push again; then mark the four ready for review.
+- **Note on the rebase:** [`tuios/note-2448-rebased.md`](tuios/note-2448-rebased.md), [posted](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7175431671) 2026-11-25
+- **Next:** wait for Gaurav's review. He lands the four with the `full-suite` label; if main moves first, rebase again with `scripts/rebase.sh --update-refs origin/main`.
 
 ---
 

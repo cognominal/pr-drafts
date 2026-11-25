@@ -1,7 +1,7 @@
-From 616ebc6c0d68cba53d017a6c4fe52b74becba52e Mon Sep 17 00:00:00 2001
+From 2e8171ba9dc9f513cf2ab23bfcbf25f2eadd261c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Sat, 21 Nov 2026 00:54:39 +0100
-Subject: [PATCH 5/5] feat: an opt-in ? control on the dock for hover help
+Subject: [PATCH 4/4] feat: an opt-in ? control on the dock for hover help
 
 The dock component "help" draws a ? cell. A click turns hover help on or
 off, as Ctrl+b h does, and the cell is lit while hover help is on: on the
@@ -23,10 +23,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  9 files changed, 120 insertions(+), 12 deletions(-)
 
 diff --git a/docs/CONFIGURATION.md b/docs/CONFIGURATION.md
-index a6b99f8b3..4f55afcb7 100644
+index c1444c236..2f5f071a8 100644
 --- a/docs/CONFIGURATION.md
 +++ b/docs/CONFIGURATION.md
-@@ -2192,6 +2192,8 @@ exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a
+@@ -2276,6 +2276,8 @@ exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a
  count and a percent, `3 copies 42%`. `waiting` means a link is down, and
  `1 failed` stays until you open the Copies panel. A click opens the panel. Add
  `transfers` to your own `right` list to see it there.
@@ -35,7 +35,7 @@ index a6b99f8b3..4f55afcb7 100644
  `session` shows the session name, workspace and pane, `main 2:1`, and is in no
  default list. `[dock.session]` takes `format` (`{session}`, `{workspace}`,
  `{pane}`) and the cell style keys `fg`, `bg`, `bold`, `cap_left` and
-@@ -5247,7 +5249,7 @@ on-click = "tuios new-window log -- git log --oneline -20"
+@@ -5356,7 +5358,7 @@ on-click = "tuios new-window log -- git log --oneline -20"
  
  These lists are the default. A missing list uses the default. An empty list (`left = []`) draws nothing on that side.
  
@@ -44,7 +44,7 @@ index a6b99f8b3..4f55afcb7 100644
  
  `session-controls` shows an agents button when the session has an agent pane. The button opens the agents view, the same as `Ctrl+B i`. When agents wait for you, the button shows how many in the attention colour.
  
-@@ -5255,6 +5257,8 @@ The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `t
+@@ -5364,6 +5366,8 @@ The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `t
  
  `transfers` shows the copies between machines. It shows nothing while no copy exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a count and a percent, `3 copies 42%`. `waiting` means a link is down. `1 failed` stays until you open the Copies panel. A click opens the [Copies panel](KEYBINDINGS.md#copies-between-machines).
  
@@ -54,10 +54,10 @@ index a6b99f8b3..4f55afcb7 100644
  
  ### Custom components
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index d5c37d35d..699ced178 100644
+index 8e2c1203e..d6c766380 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -960,6 +960,15 @@ help_keys = ["alt+shift+k"]
+@@ -992,6 +992,15 @@ help_keys = ["alt+shift+k"]
  
  `?` still shows the list of all keys.
  
@@ -74,10 +74,10 @@ index d5c37d35d..699ced178 100644
  
  `Ctrl+click` on a link opens it. `Shift+click` also opens it, but most
 diff --git a/docs/config-options.md b/docs/config-options.md
-index 70e2a9640..ebed41ce5 100644
+index 9e7892a4e..15b0b72e8 100644
 --- a/docs/config-options.md
 +++ b/docs/config-options.md
-@@ -620,9 +620,9 @@ The description of a table names its keys.
+@@ -622,9 +622,9 @@ The description of a table names its keys.
  
  | Key | Type | Default | Description |
  |---|---|---|---|
@@ -314,7 +314,7 @@ index 33ab119e6..b2ad4e580 100644
  
  // DockBuiltinComponents returns the built-in component names, sorted. Used by
 diff --git a/internal/input/mouse_click.go b/internal/input/mouse_click.go
-index d2fd3f5e5..d41125270 100644
+index b9be27a57..00d8ea4a4 100644
 --- a/internal/input/mouse_click.go
 +++ b/internal/input/mouse_click.go
 @@ -240,6 +240,13 @@ func handleMouseClick(msg tea.MouseClickMsg, o *app.OS) (*app.OS, tea.Cmd) {

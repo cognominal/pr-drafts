@@ -97,8 +97,8 @@ Also checked:
   - `TestDefaultHelpKeysAreBoundInNoOtherTable` finds 14 collisions, the GUI client's alt+shift+up/down among them.
 - `TestIdleCostStaysLow`: pass, with renders=0 at idle.
 - Size, release build (`just size`):
-  - linux/amd64: +106,496 bytes (49,483,936 → 49,590,432), 909,568 under the new ceiling.
-  - windows/amd64: +107,008 bytes (49,915,904 → 50,022,912). Main had only 84,096 bytes of room there, so this PR's first commit raises the ceiling from 50,000,000 to 50,500,000 bytes, with its reason in `docs/perf.md`. That leaves 477,088 bytes on windows/amd64 after this PR. About 57 KB of the growth is code, mostly drawing and walking the explainer, and 35 KB its function table. Moving the page text into a static table saved nothing, so the series fits under the old ceiling only by dropping features. The raise is the maintainer's call; it is a commit of its own so it can be dropped or changed.
+  - linux/amd64: +102,400 bytes (49,455,264 → 49,557,664).
+  - windows/amd64: +107,008 bytes (49,848,832 → 49,955,840), 44,160 under the 50,000,000 ceiling. About 57 KB of the growth is code, mostly drawing and walking the explainer, and 35 KB its function table.
 
 ## Since the review
 
@@ -109,14 +109,15 @@ Gaurav reviewed the stack on #2448 (2026-11-25). Two of his three points are fix
 
 The third point, stacking order, is fixed in #2446, which adds the panes.
 
+The stack is now rebased on current main. Main has more room than it had, and the whole stack fits under the 50,000,000-byte ceiling, with 13,952 bytes left on windows/amd64. So the commit that raised the ceiling is gone.
+
 ## Merge Danger
 
 **Door:** two-way. It is new code behind a new key. Ctrl+b h is a yielding default: a config that already binds h after the prefix keeps its own action. The screen preset keeps `h` for its screenshot and offers hover help on its tuios prefix.
 
 **Blast Radius:** keybindings, binary size.
 
-- The size ceiling goes up by 500,000 bytes for every target, in commit `chore: raise the binary size ceiling to 50.5 MB`.
-
+- The binary grows by 107,008 bytes on windows/amd64. The whole stack leaves 13,952 bytes under the ceiling there.
 - The help keys (ctrl+alt+arrows, ctrl+alt+pgup/pgdown, alt+shift+h) are read only while hover help is on. The rest of the time they reach the pane as before.
 - The dock now records the position of each named cell as it draws.
 
