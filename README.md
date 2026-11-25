@@ -190,7 +190,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 
 ### T1 Hover help explains the dock and the desktop
 
-- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445) (2026-11-24), branch `feat/newhelp-1-engine` pushed to `cognominal/tuios`
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445) (2026-11-24), branch `feat/newhelp-1-engine` pushed to `cognominal/tuios`; rebased and force-pushed 2026-11-25, marked ready for review the same day
 - **Activity:** 2026-11-24, I commented that the four PRs are drafts so people can look at them before they go stale, and that they are smaller than my earlier attempt (#1859) to fit Gaurav's directives. No review yet. Only the GitGuardian check runs on T1–T4; it passes.
 - **Commit:** a28c8d4d2 on origin/main 3fd531be4 (rebased 2026-11-25; before: the ceiling commit 7d91c76e4, then a49e8b84f, on 4c12ece99)
 - **Patch:** [`tuios/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch)
@@ -209,7 +209,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 
 ### T2 Hover help explains the rail and the panes
 
-- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446) (2026-11-24), branch `feat/newhelp-2-rail-panes` pushed to `cognominal/tuios`
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446) (2026-11-24), branch `feat/newhelp-2-rail-panes` pushed to `cognominal/tuios`; rebased and force-pushed 2026-11-25, marked ready for review the same day
 - **Commit:** 4731e93d5 on T1 a28c8d4d2
 - **Patch:** [`tuios/0002-feat-hover-help-explains-the-rail-and-the-panes.patch`](tuios/0002-feat-hover-help-explains-the-rail-and-the-panes.patch)
 - **PR body:** [`tuios/pr2-rail-panes.md`](tuios/pr2-rail-panes.md)
@@ -226,7 +226,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 
 ### T3 Hover help stands aside for the leader menu
 
-- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447) (2026-11-24), branch `feat/newhelp-3-leader` pushed to `cognominal/tuios`
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447) (2026-11-24), branch `feat/newhelp-3-leader` pushed to `cognominal/tuios`; rebased and force-pushed 2026-11-25, marked ready for review the same day
 - **Commit:** b13e1f2cf on T2 4731e93d5
 - **Patch:** [`tuios/0003-feat-hover-help-stands-aside-for-the-leader-menu.patch`](tuios/0003-feat-hover-help-stands-aside-for-the-leader-menu.patch)
 - **PR body:** [`tuios/pr3-leader.md`](tuios/pr3-leader.md)
