@@ -171,7 +171,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 # tuios: hover help (newhelp)
 
-Status as of 2026-11-25. **Review fixes done locally, not pushed:** Gaurav reviewed the whole stack on #2448 and asked for three fixes (see T4 below); he will land the four together once they are in. All three are fixed and tested on the local branches (T1 a49e8b84f, T2 f41e230df, T3 ad1230b26, T4 616ebc6c0), and the patches here are regenerated. Nothing is force-pushed and the review is not answered yet. **All four are submitted as draft PRs** against `main`, from branches pushed to [cognominal/tuios](https://github.com/cognominal/tuios): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The stack merged cleanly into `main` at 58 commits past its base (checked with `git merge-tree`, not rebased or retested).
+Status as of 2026-11-25. **Review fixes pushed, waiting for Gaurav:** Gaurav reviewed the whole stack on #2448 and asked for three fixes (see T4 below); he will land the four together once they are in. All three are fixed and tested (T1 a49e8b84f, T2 f41e230df, T3 ad1230b26, T4 616ebc6c0), and the patches here are regenerated. The four branches were force-pushed to the fork on 2026-11-25, the four PR bodies were updated from the `pr*.md` files, and the review was answered in [a comment on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557). The PRs are still drafts and are not rebased onto current `main`, which is 239 commits ahead. **All four are submitted as draft PRs** against `main`, from branches pushed to [cognominal/tuios](https://github.com/cognominal/tuios): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The stack merged cleanly into `main` at 58 commits past its base (checked with `git merge-tree`, not rebased or retested).
 
 **Trigger:** my own feature work on tuios: bringing Gaurav-Gosain/tuios#1859 (help mode) up to date.
 
@@ -205,7 +205,7 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - the unit tests of config, input, app and cmd/tuios pass
   - `TestIdleCostStaysLow` passes
   - size: +106,496 B on linux/amd64, +107,008 B on windows/amd64. Main had 84,096 B of room on Windows, so the first commit raises the ceiling to 50,500,000 B (your decision, 2026-11-20). `just size` passes, with 477,088 B left on windows/amd64.
-- **Next:** force-push `feat/newhelp-1-engine`, then mark it ready for review with `gh pr ready 2445 -R Gaurav-Gosain/tuios` once `just check --changed` passes on a rebase onto current `main`; the maintainer lands it with the `full-suite` label.
+- **Next:** mark it ready for review with `gh pr ready 2445 -R Gaurav-Gosain/tuios` once `just check --changed` passes on a rebase onto current `main`; the maintainer lands it with the `full-suite` label.
 
 ### T2 Hover help explains the rail and the panes
 
@@ -222,7 +222,7 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - `TestIdleCostStaysLow` passes
   - size against T1: +24,576 B on linux/amd64, +27,648 B on windows/amd64, 449,440 B under the new ceiling
   - 2026-11-21: fixed after your manual test. A rail section's explainer covered the rest of the rail; it now goes beside the rail. The rail test checks it, and fails on the old build
-- **Next:** force-push, then mark it ready for review with `gh pr ready 2446 -R Gaurav-Gosain/tuios` after #2445.
+- **Next:** mark it ready for review with `gh pr ready 2446 -R Gaurav-Gosain/tuios` after #2445.
 
 ### T3 Hover help stands aside for the leader menu
 
@@ -236,11 +236,11 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - `just check --changed` green
   - `TestIdleCostStaysLow` passes, renders=0
   - size: +0 B on all three targets
-- **Next:** force-push, then mark it ready for review with `gh pr ready 2447 -R Gaurav-Gosain/tuios` after #2446.
+- **Next:** mark it ready for review with `gh pr ready 2447 -R Gaurav-Gosain/tuios` after #2446.
 
 ### T4 An opt-in ? control on the dock
 
-- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`; changes requested 2026-11-25, fixed locally the same day, not pushed
+- **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448) (2026-11-24), branch `feat/newhelp-4-dock-control` pushed to `cognominal/tuios`; changes requested 2026-11-25, fixed and force-pushed the same day, review answered
 - **Activity:** 2026-11-25, Gaurav [reviewed the whole stack](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7160295455) here. He likes the direction and will land the four together once three things are fixed. He placed all three in T1's commit ee501bdbe, but the third is in T2's code:
   1. `internal/app/render_dock.go:556-562`: CPU and RAM hover hits are off by the 2-column `MarginRight` of `sysInfoStyle` (each part is measured with the margin, the joined segment carries it once). Measure the parts without the margin.
   2. `internal/config/help_actions.go:24-31` with `internal/input/handler.go:441-445`: the default help keys shadow tuios keys, since `hoverHelpKey` runs first. With hover help on, shift+up/down/pgup/pgdown stop scrolling in terminal mode, shift+left/right stop word moves in copy mode, and the rail's reorder keys likely go too. Skip the help keys in copy mode and rail focus, or pick unbound defaults; he would like the reachability test to check cross-section shadowing.
@@ -262,8 +262,8 @@ All four are submitted as drafts. T1 also raises the size ceiling to 50.5 MB. Br
   - size at the head: 49,619,104 B linux/amd64, 50,053,632 B windows/amd64 (446,368 B under the ceiling; the fixes cost 512 B on Windows)
   - `just check --changed` at the head, 2026-11-25: green. lint first failed when `/tmp` hit its quota and passed on rerun
   - one `cmd/tuios` run failed with "unknown option: -X"; four reruns passed, cause not found
-- **Reply to the review:** [`tuios/reply-2448-review.md`](tuios/reply-2448-review.md), not posted
-- **Next:** force-push the four branches to `fork`, update the four PR bodies from the `pr*.md` files, and post the reply on #2448. Then mark the four ready for review.
+- **Reply to the review:** [`tuios/reply-2448-review.md`](tuios/reply-2448-review.md), [posted](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557) 2026-11-25
+- **Next:** wait for Gaurav's answer. Before landing, rebase the stack onto `main` (`git rebase --update-refs`), rerun the tests and `just check --changed`, and force-push again; then mark the four ready for review.
 
 ---
 
