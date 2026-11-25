@@ -1,4 +1,4 @@
-From 5dfbf0ef8f4a95ce3189732a014b9cd0a4504feb Mon Sep 17 00:00:00 2001
+From ad1230b261fc38bfa237739daadb98a094a56981 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Sat, 21 Nov 2026 00:42:48 +0100
 Subject: [PATCH 4/5] feat: hover help stands aside for the leader menu
@@ -12,17 +12,17 @@ left when the menu closes.
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
  docs/KEYBINDINGS.md        |  4 +++-
- e2e/tui/hover_help_test.go | 37 ++++++++++++++++++++++++++++++++++++-
+ e2e/tui/hover_help_test.go | 38 +++++++++++++++++++++++++++++++++++++-
  internal/app/hover_help.go | 10 +++++++---
- 3 files changed, 46 insertions(+), 5 deletions(-)
+ 3 files changed, 47 insertions(+), 5 deletions(-)
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 126eb80d8..3e1bb53b8 100644
+index 54935a791..d5c37d35d 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -940,7 +940,9 @@ Hover help does not take the keyboard. Every other key, `esc` included, goes
- to the pane or to the open panel as usual, and so does a help key while a panel,
- hints mode or the leader has the keyboard. A click goes to what it lands on. A
+@@ -945,7 +945,9 @@ mode and reorder the rail. Some host terminals and desktops keep `Ctrl+Alt`
+ with the arrows for themselves, Ghostty on Linux among them; bind other keys
+ there. A click goes to what it lands on. A
  click on the explanation does nothing. The wheel scrolls the explanation when
 -the pointer is over it.
 +the pointer is over it. The explanation hides while the leader or one of its
@@ -32,10 +32,10 @@ index 126eb80d8..3e1bb53b8 100644
  Bind the help keys in `[keybindings.help]`. The explanation's last line shows
  the keys you bound.
 diff --git a/e2e/tui/hover_help_test.go b/e2e/tui/hover_help_test.go
-index 9c7c0c9db..14838d3a9 100644
+index 20181a09a..64ee2be70 100644
 --- a/e2e/tui/hover_help_test.go
 +++ b/e2e/tui/hover_help_test.go
-@@ -26,6 +26,13 @@ import (
+@@ -27,6 +27,13 @@ import (
  //     screen that makes one, and the dock's counter names workspace 2 only
  //     once it exists.
  //
@@ -49,19 +49,20 @@ index 9c7c0c9db..14838d3a9 100644
  //   - A page could be reached by the walk while the pointer finds nothing. The
  //     pane and rail tests hover a cell first and wait for that part's own page
  //     by its path, then walk.
-@@ -33,7 +40,10 @@ import (
- // Negative control, run: on a build of main, which has no hover help, every
- // test fails at its first wait for the explainer. On a build with hover help
- // over the dock and the desktop only, the pane test fails at the body's page
--// and the rail test at the rail's.
-+// and the rail test at the rail's. On a build without the leader menu's
-+// stand-aside, the leader test fails waiting for the explainer to go, and on
-+// one that hides the explainer but lets the pointer retarget under the menu,
-+// it fails waiting for the dock's page after the menu.
+@@ -37,7 +44,11 @@ import (
+ // and the rail test at the rail's. With the meter parts measured with their
+ // margin again, the meter test shows the CPU page at the RAM readout's first
+ // column. With the parts ranked by size alone, the on-top test shows the page
+-// of the pane under the popup. NEGATIVE_CONTROLS.md has those two runs.
++// of the pane under the popup. NEGATIVE_CONTROLS.md has those two runs. On a
++// build without the leader menu's stand-aside, the leader test fails waiting
++// for the explainer to go, and on one that hides the explainer but lets the
++// pointer retarget under the menu, it fails waiting for the dock's page after
++// the menu.
  
- // The help keys as xterm sends them: CSI 1 ; 2 for shift, ESC before a
+ // The help keys as xterm sends them: CSI 1 ; 7 for ctrl+alt, ESC before a
  // character for alt.
-@@ -313,3 +323,28 @@ func hhRightOfRail(t *testing.T, term *tuitest.Terminal, title string) {
+@@ -381,3 +392,28 @@ func hhRightOfRail(t *testing.T, term *tuitest.Terminal, title string) {
  			title, at, edge, term.Snapshot())
  	}
  }
@@ -91,10 +92,10 @@ index 9c7c0c9db..14838d3a9 100644
 +	saveArtifact(t, term, dir, "2-back")
 +}
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index af8842c53..c0d84eb32 100644
+index 761900e7d..4e21489d9 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
-@@ -211,7 +211,9 @@ func (m *OS) HelpToggleKeys() {
+@@ -220,7 +220,9 @@ func (m *OS) HelpToggleKeys() {
  // HelpHoverAt makes the smallest target under the pointer the one explained.
  // Motion over the explainer itself is ignored.
  func (m *OS) HelpHoverAt(x, y int) {
@@ -105,7 +106,7 @@ index af8842c53..c0d84eb32 100644
  		return
  	}
  	p := image.Pt(m.ScreenPoint(x, y))
-@@ -676,10 +678,12 @@ func helpRectUnion(rects []image.Rectangle) image.Rectangle {
+@@ -691,10 +693,12 @@ func helpRectUnion(rects []image.Rectangle) image.Rectangle {
  const helpLayerID = "hover-help"
  
  // renderHoverHelp draws the explainer for the target. It runs after the dock

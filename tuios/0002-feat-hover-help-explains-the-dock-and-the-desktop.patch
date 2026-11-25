@@ -1,4 +1,4 @@
-From ee501bdbe879a6dce303a06bff3b3f37bc12e0d0 Mon Sep 17 00:00:00 2001
+From a49e8b84f4d9fc8fd2a464be6850aa190ba16369 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 22:59:18 +0100
 Subject: [PATCH 2/5] feat: hover help explains the dock and the desktop
@@ -12,10 +12,15 @@ The pointer picks the target; the help keys walk without it. They are
 all modified, rebindable in [keybindings.help], and the footer shows
 the keys the config binds:
 
-  help_next / help_prev          shift+right / shift+left
-  help_deeper / help_shallower   shift+down / shift+up
-  help_scroll_up / _down         shift+pgup, alt+shift+up / shift+pgdown, alt+shift+down
+  help_next / help_prev          ctrl+alt+right / ctrl+alt+left
+  help_deeper / help_shallower   ctrl+alt+down / ctrl+alt+up
+  help_scroll_up / _down         ctrl+alt+pgup / ctrl+alt+pgdown
   help_keys                      alt+shift+h
+
+The help keys are read ahead of every other route while the explainer
+is up, so no default is a key another table binds. A test presses
+every section's default keys with hover help up, and another checks
+the help defaults against every table, the GUI client's included.
 
 Hover help is a view, not a mode: every other key reaches the pane,
 clicks reach what they land on, and the wheel scrolls the explainer only
@@ -27,39 +32,41 @@ places itself against the cells on screen.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- docs/KEYBINDINGS.md                 |  39 ++
- docs/keybindings-defaults.md        |  13 +
- e2e/tui/hover_help_test.go          | 210 ++++++
- internal/app/dock_components.go     |  30 +-
- internal/app/dock_helpers.go        |  15 +
- internal/app/hover_help.go          | 976 ++++++++++++++++++++++++++++
- internal/app/os.go                  |  23 +-
- internal/app/program_options.go     |   6 +
- internal/app/render.go              |   6 +
- internal/app/render_dock.go         |  20 +-
- internal/config/actions.go          |  10 +
- internal/config/help_actions.go     |  33 +
- internal/config/keybind_scopes.go   |  11 +
- internal/config/keybind_tables.go   |   2 +
- internal/config/presets/screen.toml |   2 +
- internal/config/registry.go         |   2 +-
- internal/config/userconfig.go       |  12 +
- internal/config/whichkey_menu.go    |   1 +
- internal/input/actions.go           |   1 +
- internal/input/handler.go           |  24 +
- internal/input/hover_help.go        |  48 ++
- internal/input/reachability_test.go |  14 +-
- 22 files changed, 1476 insertions(+), 22 deletions(-)
+ docs/KEYBINDINGS.md                  |  44 ++
+ docs/keybindings-defaults.md         |  13 +
+ e2e/tui/hover_help_test.go           | 237 +++++++
+ internal/app/dock_components.go      |  30 +-
+ internal/app/dock_helpers.go         |  15 +
+ internal/app/hover_help.go           | 977 +++++++++++++++++++++++++++
+ internal/app/os.go                   |  23 +-
+ internal/app/program_options.go      |   6 +
+ internal/app/render.go               |   6 +
+ internal/app/render_dock.go          |  20 +-
+ internal/config/actions.go           |  10 +
+ internal/config/help_actions.go      |  36 +
+ internal/config/help_actions_test.go |  32 +
+ internal/config/keybind_scopes.go    |  12 +
+ internal/config/keybind_tables.go    |   2 +
+ internal/config/presets/screen.toml  |   2 +
+ internal/config/registry.go          |   2 +-
+ internal/config/userconfig.go        |  12 +
+ internal/config/whichkey_menu.go     |   1 +
+ internal/input/actions.go            |   1 +
+ internal/input/handler.go            |  24 +
+ internal/input/hover_help.go         |  48 ++
+ internal/input/reachability_test.go  |  39 +-
+ 23 files changed, 1570 insertions(+), 22 deletions(-)
  create mode 100644 e2e/tui/hover_help_test.go
  create mode 100644 internal/app/hover_help.go
  create mode 100644 internal/config/help_actions.go
+ create mode 100644 internal/config/help_actions_test.go
  create mode 100644 internal/input/hover_help.go
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 7e654cffe..126eb80d8 100644
+index 7e654cffe..54935a791 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -914,6 +914,45 @@ the text into the focused pane. This action has no default key. Bind it, or
+@@ -914,6 +914,50 @@ the text into the focused pane. This action has no default key. Bind it, or
  run it from the command palette. Set `hints.all_panes = true` to make
  `Ctrl+B F` do the same.
  
@@ -77,17 +84,22 @@ index 7e654cffe..126eb80d8 100644
 +
 +| Key | Action | What it does |
 +|-----|--------|--------------|
-+| `Shift+Right` | `help_next` | Explain the next component |
-+| `Shift+Left` | `help_prev` | Explain the previous component |
-+| `Shift+Down` | `help_deeper` | Go into the component's parts, then to the next part |
-+| `Shift+Up` | `help_shallower` | Go to the previous part, then out to the component |
-+| `Shift+PgUp`, `Alt+Shift+Up` | `help_scroll_up` | Scroll a long explanation up |
-+| `Shift+PgDown`, `Alt+Shift+Down` | `help_scroll_down` | Scroll a long explanation down |
++| `Ctrl+Alt+Right` | `help_next` | Explain the next component |
++| `Ctrl+Alt+Left` | `help_prev` | Explain the previous component |
++| `Ctrl+Alt+Down` | `help_deeper` | Go into the component's parts, then to the next part |
++| `Ctrl+Alt+Up` | `help_shallower` | Go to the previous part, then out to the component |
++| `Ctrl+Alt+PgUp` | `help_scroll_up` | Scroll a long explanation up |
++| `Ctrl+Alt+PgDown` | `help_scroll_down` | Scroll a long explanation down |
 +| `Alt+Shift+H` | `help_keys` | Show every key of the part, and back |
 +
 +Hover help does not take the keyboard. Every other key, `esc` included, goes
 +to the pane or to the open panel as usual, and so does a help key while a panel,
-+hints mode or the leader has the keyboard. A click goes to what it lands on. A
++hints mode or the leader has the keyboard. While hover help is up, its keys
++come before every other binding, so no default help key is one that another
++table binds: the shifted arrows still scroll the pane, move by word in copy
++mode and reorder the rail. Some host terminals and desktops keep `Ctrl+Alt`
++with the arrows for themselves, Ghostty on Linux among them; bind other keys
++there. A click goes to what it lands on. A
 +click on the explanation does nothing. The wheel scrolls the explanation when
 +the pointer is over it.
 +
@@ -96,7 +108,7 @@ index 7e654cffe..126eb80d8 100644
 +
 +```toml
 +[keybindings.help]
-+help_next = ["shift+right", "ctrl+n"]
++help_next = ["ctrl+alt+right", "ctrl+n"]
 +help_keys = ["alt+shift+k"]
 +```
 +
@@ -106,7 +118,7 @@ index 7e654cffe..126eb80d8 100644
  
  `Ctrl+click` on a link opens it. `Shift+click` also opens it, but most
 diff --git a/docs/keybindings-defaults.md b/docs/keybindings-defaults.md
-index c7020edef..0828bf2fd 100644
+index c7020edef..0d513f447 100644
 --- a/docs/keybindings-defaults.md
 +++ b/docs/keybindings-defaults.md
 @@ -402,6 +402,18 @@ Run `tuios keybinds list` to see the keys that your config sets.
@@ -117,13 +129,13 @@ index c7020edef..0828bf2fd 100644
 +
 +| Keys | Action | Description |
 +|---|---|---|
-+| `shift+down` | `help_deeper` | Hover help: explain the next part of the component |
++| `ctrl+alt+down` | `help_deeper` | Hover help: explain the next part of the component |
 +| `alt+shift+h` | `help_keys` | Hover help: show every key of the target, or its main keys |
-+| `shift+right` | `help_next` | Hover help: explain the next component |
-+| `shift+left` | `help_prev` | Hover help: explain the previous component |
-+| `shift+pgdown`, `alt+shift+down` | `help_scroll_down` | Hover help: scroll the explanation down |
-+| `shift+pgup`, `alt+shift+up` | `help_scroll_up` | Hover help: scroll the explanation up |
-+| `shift+up` | `help_shallower` | Hover help: explain the previous part, or the whole component |
++| `ctrl+alt+right` | `help_next` | Hover help: explain the next component |
++| `ctrl+alt+left` | `help_prev` | Hover help: explain the previous component |
++| `ctrl+alt+pgdown` | `help_scroll_down` | Hover help: scroll the explanation down |
++| `ctrl+alt+pgup` | `help_scroll_up` | Hover help: scroll the explanation up |
++| `ctrl+alt+up` | `help_shallower` | Hover help: explain the previous part, or the whole component |
 +
  ## Prefix (ctrl+b)
  
@@ -138,10 +150,10 @@ index c7020edef..0828bf2fd 100644
  
 diff --git a/e2e/tui/hover_help_test.go b/e2e/tui/hover_help_test.go
 new file mode 100644
-index 000000000..72481d5a5
+index 000000000..43d98bbaf
 --- /dev/null
 +++ b/e2e/tui/hover_help_test.go
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,237 @@
 +package tuie2e
 +
 +import (
@@ -152,7 +164,7 @@ index 000000000..72481d5a5
 +)
 +
 +// Hover help, driven through the real binary: the leader then h turns it on
-+// and off, the pointer and the shift arrows pick what it explains, and it
++// and off, the pointer and the help keys pick what it explains, and it
 +// takes no key and no click that is not its own. Every step saves its screen,
 +// plain and styled, under artifactDir.
 +//
@@ -172,17 +184,17 @@ index 000000000..72481d5a5
 +// Negative control, run: on a build of main, which has no hover help, every
 +// test fails at its first wait for the explainer.
 +
-+// The help keys as xterm sends them: CSI 1 ; 2 for shift, ESC before a
++// The help keys as xterm sends them: CSI 1 ; 7 for ctrl+alt, ESC before a
 +// character for alt.
 +const (
-+	hhShiftRight tuitest.Key = "\x1b[1;2C"
-+	hhShiftLeft  tuitest.Key = "\x1b[1;2D"
-+	hhShiftDown  tuitest.Key = "\x1b[1;2B"
-+	hhShiftUp    tuitest.Key = "\x1b[1;2A"
-+	hhAltShiftH  tuitest.Key = "\x1bH"
-+	hhAltShiftK  tuitest.Key = "\x1bK"
-+	hhUp         tuitest.Key = "\x1b[A"
-+	hhDown       tuitest.Key = "\x1b[B"
++	hhNext      tuitest.Key = "\x1b[1;7C"
++	hhPrev      tuitest.Key = "\x1b[1;7D"
++	hhDeeper    tuitest.Key = "\x1b[1;7B"
++	hhShallower tuitest.Key = "\x1b[1;7A"
++	hhAltShiftH tuitest.Key = "\x1bH"
++	hhAltShiftK tuitest.Key = "\x1bK"
++	hhUp        tuitest.Key = "\x1b[A"
++	hhDown      tuitest.Key = "\x1b[B"
 +)
 +
 +// hhClose is the footer's close hint under the default leader. Only the
@@ -237,28 +249,55 @@ index 000000000..72481d5a5
 +	saveArtifact(t, term, dir, "mode-pill")
 +}
 +
-+// TestHoverHelpWalksWithTheShiftArrows walks from the dock to the desktop and
++// TestHoverHelpExplainsEachMeter puts the CPU and RAM readouts side by side
++// and hovers the first column of the RAM readout, then the last column of the
++// CPU graph. The two share one segment of the dock, so each records its own
++// columns; once the segment's margin was counted in each readout, the first
++// two columns of the RAM readout explained the CPU.
++func TestHoverHelpExplainsEachMeter(t *testing.T) {
++	term, dir := hoverHelpStart(t, "[appearance]\nshow_cpu = true\nshow_ram = true\nshow_clock = false\n\n"+
++		"[dock]\nright = ['cpu', 'ram']\n")
++	_, rows := term.Screen().Size()
++	waitText(t, term, "the RAM readout on the dock", "RAM:")
++	toggleHoverHelp(t, term)
++	waitText(t, term, "the explainer", hhClose)
++	dock := strings.Split(term.Screen().Text(), "\n")[rows-1]
++	before, _, found := strings.Cut(dock, "RAM:")
++	if !found {
++		t.Fatalf("the dock has no RAM readout\n%s", term.Snapshot())
++	}
++	ramX := len([]rune(before))
++	mouseHover(t, term, ramX, rows-1)
++	waitText(t, term, "the RAM page at the readout's first column", "Dock › RAM", "The memory readout")
++	saveArtifact(t, term, dir, "ram")
++	// The CPU graph ends one space before the RAM readout.
++	mouseHover(t, term, ramX-2, rows-1)
++	waitText(t, term, "the CPU page at the graph's last column", "Dock › CPU", "The CPU readout")
++	saveArtifact(t, term, dir, "cpu")
++}
++
++// TestHoverHelpWalksWithTheHelpKeys walks from the dock to the desktop and
 +// back, into the dock's parts and out, then shows every key and goes back.
-+func TestHoverHelpWalksWithTheShiftArrows(t *testing.T) {
++func TestHoverHelpWalksWithTheHelpKeys(t *testing.T) {
 +	term, dir := hoverHelpStart(t, "")
 +	toggleHoverHelp(t, term)
 +	waitText(t, term, "hover help opens on the dock", "Dock (", hhClose)
 +	saveArtifact(t, term, dir, "1-dock")
 +
-+	sendKeys(t, term, hhShiftRight)
-+	waitText(t, term, "shift+right reaches the desktop", "The desktop behind the panes")
++	sendKeys(t, term, hhNext)
++	waitText(t, term, "ctrl+alt+right reaches the desktop", "The desktop behind the panes")
 +	saveArtifact(t, term, dir, "2-desktop")
 +
-+	sendKeys(t, term, hhShiftLeft)
-+	waitText(t, term, "shift+left comes back to the dock", "Dock (")
++	sendKeys(t, term, hhPrev)
++	waitText(t, term, "ctrl+alt+left comes back to the dock", "Dock (")
 +
-+	sendKeys(t, term, hhShiftDown)
-+	waitText(t, term, "shift+down goes into the dock", "Dock › ")
++	sendKeys(t, term, hhDeeper)
++	waitText(t, term, "ctrl+alt+down goes into the dock", "Dock › ")
 +	saveArtifact(t, term, dir, "3-dock-part")
 +
-+	sendKeys(t, term, hhShiftUp)
-+	waitText(t, term, "shift+up comes out to the dock", "Dock (")
-+	waitGone(t, term, "shift+up comes out to the dock", "Dock › ")
++	sendKeys(t, term, hhShallower)
++	waitText(t, term, "ctrl+alt+up comes out to the dock", "Dock (")
++	waitGone(t, term, "ctrl+alt+up comes out to the dock", "Dock › ")
 +
 +	sendKeys(t, term, hhAltShiftH)
 +	waitText(t, term, "alt+shift+h shows every key", "All keys", "h back")
@@ -289,15 +328,15 @@ index 000000000..72481d5a5
 +	toggleHoverHelp(t, term)
 +	waitText(t, term, "the explainer opens on the dock", "Dock (", hhClose)
 +
-+	sendKeys(t, term, hhUp, hhDown, "h", hhShiftRight)
-+	waitText(t, term, "shift+right walks to the desktop", "The desktop behind the panes")
++	sendKeys(t, term, hhUp, hhDown, "h", hhNext)
++	waitText(t, term, "ctrl+alt+right walks to the desktop", "The desktop behind the panes")
 +	sendKeys(t, term, tuitest.Enter)
 +	// cat -v writes the line back after enter, so the line is on screen twice
 +	// once the pane had it: the terminal's echo and cat's copy.
 +	waitLines(t, term, "^[[A^[[Bh", 2)
 +	saveArtifact(t, term, dir, "cat-v")
-+	if text := term.Screen().Text(); strings.Contains(text, "^[[1;2") {
-+		t.Fatalf("ASSERTION: a shift arrow reached the pane while hover help was up\n%s", term.Snapshot())
++	if text := term.Screen().Text(); strings.Contains(text, "^[[1;7") {
++		t.Fatalf("ASSERTION: a help key reached the pane while hover help was up\n%s", term.Snapshot())
 +	}
 +	sendKeys(t, term, tuitest.Ctrl('c'))
 +}
@@ -353,7 +392,7 @@ index 000000000..72481d5a5
 +	saveArtifact(t, term, dir, "clicked")
 +}
 diff --git a/internal/app/dock_components.go b/internal/app/dock_components.go
-index ffc6b16fe..131abf870 100644
+index ffc6b16fe..6249081d4 100644
 --- a/internal/app/dock_components.go
 +++ b/internal/app/dock_components.go
 @@ -469,14 +469,15 @@ func (m *OS) DockComponents() []DockComponentInfo {
@@ -407,7 +446,7 @@ index ffc6b16fe..131abf870 100644
 +				// each one records the columns it alone occupies.
 +				px := x
 +				for i, part := range meters {
-+					pw := lipgloss.Width(meterStyle.Render(part))
++					pw := lipgloss.Width(part) // the style adds only its margin, once, after the last
 +					helpHits = append(helpHits, dockCustomHit{X0: px, X1: px + pw, Name: meterNames[i]})
 +					px += pw + 1 // the space joining the readouts
 +				}
@@ -481,10 +520,10 @@ index 308c95170..5cee64074 100644
  // message is a transient claim on the right-hand end rather than a cell, so
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
 new file mode 100644
-index 000000000..f21c8a1ed
+index 000000000..ea2b71cab
 --- /dev/null
 +++ b/internal/app/hover_help.go
-@@ -0,0 +1,976 @@
+@@ -0,0 +1,977 @@
 +package app
 +
 +import (
@@ -506,9 +545,10 @@ index 000000000..f21c8a1ed
 +// It is a view, not a mode. The explainer is drawn beside its target and owns
 +// no input: a key that is not one of the help keys reaches the pane, a click
 +// reaches whatever it lands on, and motion picks the target and then goes on
-+// to whatever wants it. The help keys are all modified (shift+arrows by
-+// default), so none of them is a key a shell needs bare. The explainer follows
-+// the layout those keys and clicks leave.
++// to whatever wants it. The help keys are all modified (ctrl+alt and the
++// arrows by default), so none of them is a key a shell needs bare, and no
++// other table binds them. The explainer follows the layout those keys and
++// clicks leave.
 +//
 +// The explainer is the theme's panel ground with no border, placed above or
 +// below its target and never over it. At 16 colours the ground is the
@@ -1639,10 +1679,10 @@ index 70c3244b8..4c921603b 100644
  	{Name: "focus_sidebar", Desc: "Focus sidebar"},
 diff --git a/internal/config/help_actions.go b/internal/config/help_actions.go
 new file mode 100644
-index 000000000..215e78c5c
+index 000000000..8e3d74840
 --- /dev/null
 +++ b/internal/config/help_actions.go
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,36 @@
 +package config
 +
 +// Hover help's keys, the ones a config can bind in [keybindings.help]. They
@@ -1661,23 +1701,64 @@ index 000000000..215e78c5c
 +	ActionHelpKeys        = "help_keys"
 +)
 +
-+// getDefaultHelpKeybinds returns hover help's keys. The shifted arrows walk:
-+// left and right between the components, down and up into a component's parts
-+// and back out. The shifted pages and alt+shift+up and down scroll a long
++// getDefaultHelpKeybinds returns hover help's keys. Help keys are read ahead
++// of every other route while the explainer is up, so no default here is a key
++// another table binds: the shifted arrows were, and took the pane's scroll,
++// copy mode's word moves and the rail's reorder. ctrl+alt with the arrows
++// walks, left and right between the components, down and up into a
++// component's parts and back out. ctrl+alt with the pages scrolls a long
 +// explanation, and alt+shift+h shows every key of the target.
 +func getDefaultHelpKeybinds() map[string][]string {
 +	return map[string][]string{
-+		ActionHelpNext:       {"shift+right"},
-+		ActionHelpPrev:       {"shift+left"},
-+		ActionHelpDeeper:     {"shift+down"},
-+		ActionHelpShallower:  {"shift+up"},
-+		ActionHelpScrollUp:   {"shift+pgup", "alt+shift+up"},
-+		ActionHelpScrollDown: {"shift+pgdown", "alt+shift+down"},
++		ActionHelpNext:       {"ctrl+alt+right"},
++		ActionHelpPrev:       {"ctrl+alt+left"},
++		ActionHelpDeeper:     {"ctrl+alt+down"},
++		ActionHelpShallower:  {"ctrl+alt+up"},
++		ActionHelpScrollUp:   {"ctrl+alt+pgup"},
++		ActionHelpScrollDown: {"ctrl+alt+pgdown"},
 +		ActionHelpKeys:       {"alt+shift+h"},
 +	}
 +}
+diff --git a/internal/config/help_actions_test.go b/internal/config/help_actions_test.go
+new file mode 100644
+index 000000000..830e67391
+--- /dev/null
++++ b/internal/config/help_actions_test.go
+@@ -0,0 +1,32 @@
++package config
++
++import "testing"
++
++// TestDefaultHelpKeysAreBoundInNoOtherTable holds the rule that
++// getDefaultHelpKeybinds states. The help keys are read ahead of every other
++// route, so a default shared with another table takes that table's key while
++// the explainer is up. The input package's TestHoverHelpShadowsNoDefaultBinding
++// presses every such key; this test also covers the tables it cannot press,
++// such as the GUI client's, which reads its keys before tuios sees them.
++func TestDefaultHelpKeysAreBoundInNoOtherTable(t *testing.T) {
++	k := DefaultConfig().Keybindings
++	help := map[string]string{}
++	for action, keys := range k.Help {
++		for _, key := range keys {
++			help[CanonicalKey(key)] = action
++		}
++	}
++	for i := range keybindTables {
++		table := keybindTables[i]
++		if Table(i) == TableHelp {
++			continue
++		}
++		for action, keys := range *table.field(&k) {
++			for _, key := range keys {
++				if helpAction, ok := help[CanonicalKey(key)]; ok {
++					t.Errorf("%s is the default of help.%s and of %s.%s", key, helpAction, table.name, action)
++				}
++			}
++		}
++	}
++}
 diff --git a/internal/config/keybind_scopes.go b/internal/config/keybind_scopes.go
-index 7b3f82e62..30f69463e 100644
+index 7b3f82e62..fa1f380d7 100644
 --- a/internal/config/keybind_scopes.go
 +++ b/internal/config/keybind_scopes.go
 @@ -79,6 +79,7 @@ const (
@@ -1696,15 +1777,16 @@ index 7b3f82e62..30f69463e 100644
  	ScopePrefix         = "prefix"
  	ScopePrefixWindow   = "prefix.window"
  	ScopePrefixMinimize = "prefix.minimize"
-@@ -226,6 +228,15 @@ func Scopes(leader string) []Scope {
+@@ -226,6 +228,16 @@ func Scopes(leader string) []Scope {
  			Sections: []string{SectionReview},
  			Reaches:  ReachModal,
  		},
 +		{
-+			// Live only while hover help is up. Help is a view and not a
-+			// mode: the pane keeps every other key, so the keys here are taken
-+			// from it, which is why the defaults are shifted arrows and pages
-+			// that a shell rarely needs.
++			// Live only while hover help is up, and read ahead of every
++			// other scope. Help is a view and not a mode: the pane keeps every
++			// other key, so the keys here are taken from it and from whatever
++			// else is live, which is why the defaults are ctrl+alt arrows and
++			// pages that no other table binds and a shell rarely needs.
 +			ID: ScopeHelp, Name: "Hover help",
 +			Sections: []string{SectionHelp},
 +			Reaches:  ReachSteals,
@@ -1951,7 +2033,7 @@ index 000000000..b8eacfe60
 +	return true
 +}
 diff --git a/internal/input/reachability_test.go b/internal/input/reachability_test.go
-index 0ce4ca97e..bf521f0fd 100644
+index 0ce4ca97e..462c44037 100644
 --- a/internal/input/reachability_test.go
 +++ b/internal/input/reachability_test.go
 @@ -168,9 +168,21 @@ func reachSections(t *testing.T) []bindingSection {
@@ -1976,7 +2058,48 @@ index 0ce4ca97e..bf521f0fd 100644
  // reachReviewOS is a client with the review overlay open on a diff.
  func reachQuickLookOS(t *testing.T) *app.OS {
  	t.Helper()
-@@ -890,7 +902,7 @@ func TestEveryDescribedActionIsHandled(t *testing.T) {
+@@ -269,8 +281,30 @@ func reachMailOS(t *testing.T) *app.OS {
+ // handler can see them, and the eight negative controls that mutate a handler
+ // all pass while the feature is dead.
+ func TestEveryDefaultBindingReachesItsAction(t *testing.T) {
++	checkDefaultBindingsReach(t, false)
++}
++
++// TestHoverHelpShadowsNoDefaultBinding runs the same table with hover help up.
++// Hover help's keys are read ahead of every other route, so a default help key
++// that another section also binds takes that key from it for as long as the
++// explainer is up: the shifted arrows once stopped scrolling the pane in
++// terminal mode, moving by word in copy mode and reordering the rail. The help
++// section itself is left out, since it is the one being checked against.
++func TestHoverHelpShadowsNoDefaultBinding(t *testing.T) {
++	checkDefaultBindingsReach(t, true)
++}
++
++// checkDefaultBindingsReach presses every default key of every section in
++// every mode it is live in, and checks the key ran its action. With helpUp,
++// hover help is turned on in each fixture first, and its own section is
++// skipped.
++func checkDefaultBindingsReach(t *testing.T, helpUp bool) {
++	t.Helper()
+ 	k := config.DefaultConfig().Keybindings
+ 	for _, sec := range reachSections(t) {
++		if helpUp && sec.name == config.SectionHelp {
++			continue
++		}
+ 		for _, mode := range sec.modes {
+ 			for _, action := range sortedActions(sec.binds) {
+ 				for _, key := range sec.binds[action] {
+@@ -280,6 +314,9 @@ func TestEveryDefaultBindingReachesItsAction(t *testing.T) {
+ 							t.Skipf("%s is bound ahead of its work (%s)", action, unit)
+ 						}
+ 						o := sec.newOS(t)
++						if helpUp && !o.HoverHelpOn() {
++							o.ToggleHoverHelp()
++						}
+ 						o.Mode = mode
+ 						if sec.leader {
+ 							o = pressKey(t, o, k.LeaderKey)
+@@ -890,7 +927,7 @@ func TestEveryDescribedActionIsHandled(t *testing.T) {
  	// below does not name it; runCopyModeAction runs it through its constant.
  	handled := map[string]bool{app.HoldModeAction: true, config.ActionCopyModeFirstNonBlank: true}
  	k := config.DefaultConfig().Keybindings

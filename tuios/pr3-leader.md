@@ -30,7 +30,7 @@ Esc                      → menu gone, "Dock (" back, and no "Dock › Mode"
 
 - **Before** (T2 build): fails at "the explainer under the leader menu". The explainer and the menu are drawn side by side.
 - **Before** (T2 + the render gate only, no pointer freeze): fails waiting for "Dock (" after the menu, because the hover under the menu moved the explainer.
-- **After:** all 10 hover help e2e tests pass on the real and sim backends.
+- **After:** all 12 hover help e2e tests pass on the real and sim backends.
 
 Also checked:
 
