@@ -1,6 +1,6 @@
 # Issues and PRs
 
-Upstream PRs and issues, and issues in my own repos. Four series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), [rak: irak feedback](#rak-irak-feedback-before-submission), and [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks) (at the end).
+Upstream PRs and issues, and issues in my own repos. Five series: the MoarVM crash investigation (below), [tuios hover help](#tuios-hover-help-newhelp), [rak: irak feedback](#rak-irak-feedback-before-submission), [rak: atuin](#rak-atuin-history-and-search-in-irak), and [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks) (at the end).
 
 An hourly check, [`tools/watch.sh`](tools/watch.sh), looks at every PR and issue linked here on GitHub. When one changed, it shows a desktop notice and starts a Claude agent in the tuios session `pr-drafts`, which updates this page, commits, pushes and leaves a summary in the tuios Inbox. A systemd user timer runs it: [`tools/systemd/`](tools/systemd/), installed with `systemctl --user link` on both files, then `systemctl --user enable --now pr-drafts-watch.timer`.
 
@@ -9,6 +9,7 @@ An hourly check, [`tools/watch.sh`](tools/watch.sh), looks at every PR and issue
 - [MoarVM crash investigation](#moarvm-crash-investigation-issues-and-prs)
 - [tuios: hover help](#tuios-hover-help-newhelp)
 - [rak: irak feedback](#rak-irak-feedback-before-submission)
+- [rak: atuin](#rak-atuin-history-and-search-in-irak)
 - [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks)
 
 ## Contents
@@ -35,6 +36,8 @@ An hourly check, [`tools/watch.sh`](tools/watch.sh), looks at every PR and issue
 - [rak: irak feedback before submission](#rak-irak-feedback-before-submission)
   - [R1 \[RFE\] in irak add feedback before submission](#r1-rfe-in-irak-add-feedback-before-submission)
   - [R2 Terminal::LineEditor: an `&on-finish` callback, and a timeout on terminal queries](#r2-terminallineeditor-an-on-finish-callback-and-a-timeout-on-terminal-queries)
+- [rak: atuin history and search in irak](#rak-atuin-history-and-search-in-irak)
+  - [A1 Terminal::LineEditor: stop the input parser without blocking in read](#a1-terminallineeditor-stop-the-input-parser-without-blocking-in-read)
 - [oh-my-pi: OSC 133 marks](#oh-my-pi-osc-133-marks)
   - [O1 The OSC 133 marks on a user message leave the command empty](#o1-the-osc-133-marks-on-a-user-message-leave-the-command-empty)
   - [O2 Put the user message between the OSC 133 B and C marks](#o2-put-the-user-message-between-the-osc-133-b-and-c-marks)
@@ -155,7 +158,7 @@ One folder per upstream repo. Each holds the `git format-patch` files of its PRs
 | [`rakudo/`](rakudo/) | rakudo/rakudo | #4 | `c931c668` |
 | [`tuios/`](tuios/) | Gaurav-Gosain/tuios | T1–T4 | `25d34f6d` |
 | [`rak/`](rak/) | cognominal/rak | R1 | `c931c668` |
-| [`terminal-lineeditor/`](terminal-lineeditor/) | japhb/Terminal-LineEditor | R2 | `7c865896` |
+| [`terminal-lineeditor/`](terminal-lineeditor/) | japhb/Terminal-LineEditor | R2, A1 | `7c865896`, `9ae20bec` |
 | [`oh-my-pi/`](oh-my-pi/) | can1357/oh-my-pi | O1–O3 | `40df6d54`, `955da6aa`, `3dfd2fbb` |
 
 Sessions are local Claude Code sessions (no web link). The full IDs and resume commands are at the top of each series.
@@ -312,6 +315,36 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
   - The cursor-position and screen-size queries are sent together and time out after `$.query-timeout` (1 s), falling back to column 1 and 80 columns. A terminal that never answered hung the prompt.
 - **Tested:** the module's own tests pass; irak uses both changes (see R1).
 - **Submitted:** as one PR with both commits. They are independent, so they can still be split if the maintainer asks.
+
+---
+
+# rak: atuin history and search in irak
+
+**Trigger:** a request of mine to integrate [atuin](https://atuin.sh) with rak. irak now records each submission in atuin, and `Ctrl-R` runs `atuin search`. Handing the terminal to atuin exposed a Terminal::LineEditor bug: after leaving raw mode, its input thread steals the next key. The rak side is on branch `rak` of cognominal/rak (e986c9f2e7 and its parents), and is documented in `rak-plans/features/atuin.md`. The `atuin import irak` importer is on branch [`rak`](https://github.com/cognominal/atuin/tree/rak) of the fork cognominal/atuin. It is not proposed upstream.
+
+**Claude session:** `9ae20bec-1f97-4585-9e2c-d2252a47882a`. Resume it with `cd ~/.local/share/tuios/worktrees/atuinsh---atuin/rak && claude --resume 9ae20bec-1f97-4585-9e2c-d2252a47882a`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-atuinsh---atuin-rak/9ae20bec-1f97-4585-9e2c-d2252a47882a.jsonl`.
+
+| # | Repo | Kind | Topic | Status |
+|---|---|---|---|---|
+| A1 | LineEditor | PR | parser stop | tested |
+
+### A1 Terminal::LineEditor: stop the input parser without blocking in read
+
+- **Status:** tested, unsubmitted.
+- **Branch:** `parser-stop` in `~/git/japhb---Terminal-LineEditor`, 1 commit (6476dc9) on 97fa744 (release 0.0.23, still upstream `main`). Pushed to the fork [cognominal/Terminal-LineEditor](https://github.com/cognominal/Terminal-LineEditor/tree/parser-stop) (remote `fork`).
+- **Patch:** [`terminal-lineeditor/0001-Stop-the-input-parser-without-blocking-in-read.patch`](terminal-lineeditor/0001-Stop-the-input-parser-without-blocking-in-read.patch)
+- **PR body:** [`terminal-lineeditor/pr-parser-stop.md`](terminal-lineeditor/pr-parser-stop.md)
+- **Depends on:** nothing. It applies to 0.0.23 without R2, and rak applies it after R2 as patch 3/3 of `tools/build/rak-line-editor-patches/Terminal-LineEditor-0.0.23.patch`.
+- **What:** `lib/Terminal/LineEditor/RawTerminalInput.rakumod`.
+  - The parser waits with `poll(2)` in 50 ms slices and reads the descriptor with `read(2)`. It checks between slices whether it should stop.
+  - Each `start-parser` starts a new generation, and older parsers stop.
+  - `enter-raw-mode` drains output instead of flushing the terminal, so keys typed ahead are kept.
+- **Tested:**
+  - On 0.0.23 with only this commit, under `script(1)`: a child run after leaving raw mode gets `hello` instead of `ello`, and two prompts return `ab` and `xy`, typed later or ahead. Stock 0.0.23 hangs on the second prompt.
+  - The module's tests pass.
+  - In rak, all 14 irak tests pass, including `032-irak-atuin-search.t`, and `Ctrl-R` works with the real atuin.
+- **Caveat:** stock 0.0.23 loses keys that arrive in the same chunk as a cursor-position answer. That quirk is not in this PR's scope, and a real terminal sends the answer and the keys separately.
+- **Submit:** `gh pr create -R japhb/Terminal-LineEditor --head cognominal:parser-stop --title "Stop the input parser without blocking in read" --body-file terminal-lineeditor/pr-parser-stop.md`
 
 ---
 
