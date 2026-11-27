@@ -356,13 +356,13 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 
 | # | Repo | Kind | Topic | Status |
 |---|---|---|---|---|
-| O1 | oh-my-pi | [issue](https://github.com/can1357/oh-my-pi/issues/20123) | OSC 133 | filed |
+| O1 | oh-my-pi | [issue](https://github.com/can1357/oh-my-pi/issues/20123) | OSC 133 | accepted |
 | O2 | oh-my-pi | PR | fixes O1 | superseded |
 | O3 | oh-my-pi | issue | relay tests | drafted |
 
 ### O1 The OSC 133 marks on a user message leave the command empty
 
-- **Status:** filed 2026-11-22 as [can1357/oh-my-pi#20123](https://github.com/can1357/oh-my-pi/issues/20123)
+- **Status:** accepted: filed 2026-11-22 as [can1357/oh-my-pi#20123](https://github.com/can1357/oh-my-pi/issues/20123), closed as completed by `can1357` on 2026-11-27, fixed on `main` by `f2b6a85da7`
 - **Body:** [`oh-my-pi/issue-osc133-empty-command.md`](oh-my-pi/issue-osc133-empty-command.md)
 - **What:** `UserMessageComponent.render()` in `packages/tui/src/chat/user-message.ts` puts `133;A` at the start of the bubble and `133;B`, `C` and `D;0` together at the end of its last row. The message lands in the prompt span, and the command span (`B`..`C`) is empty. tuios's scrollback parser (`internal/scrollback/parser.go`, `parseWithMarkers`) skips a block with an empty command, so an omp pane lists none.
 - **Proposed:** emit `B` right after `A`, keep `C` and `D` at the end of the same render, so the caret fix of #8030 holds. Optionally move `D` after the reply.
@@ -370,12 +370,13 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 - **Related:** #8030 and #6115 (the caret bug), #17145 and #17307 (OSC 7501 side effects of the same marks).
 - **Depends on:** nothing
 - **Not done:** no workaround in tuios. tuios also drops a `working` OSC 7501 record on `133;A` (`internal/session/program_status.go`), as #17145 describes for Rex; omp now turns the marks off while a run is active.
-- **Response:** on 2026-11-22 the maintainers' bot `roboomp` reproduced it on `main` and opened [can1357/oh-my-pi#20124](https://github.com/can1357/oh-my-pi/pull/20124), "fix(tui): placed user message in the osc 133 command span": `133;A` + `133;B` open the bubble, `133;C` + `133;D;0` close it, the same layout as O2. Moving `D` after the reply is left out. Open, not merged (checked 2026-11-23).
-- **Next:** wait for #20124 to be merged, then check that tuios lists the commands, and close O1 if the bot does not.
+- **Response:** on 2026-11-22 the maintainers' bot `roboomp` reproduced it on `main` and opened [can1357/oh-my-pi#20124](https://github.com/can1357/oh-my-pi/pull/20124), "fix(tui): placed user message in the osc 133 command span": `133;A` + `133;B` open the bubble, `133;C` + `133;D;0` close it, the same layout as O2. Moving `D` after the reply is left out.
+- **Fate:** on 2026-11-27 `can1357` closed #20124 unmerged: the reactive TUI rewrite removed `user-message.ts`. They ported the fix onto the new painter in [`f2b6a85da7`](https://github.com/can1357/oh-my-pi/commit/f2b6a85da7) ("fix(tui): placed user prompts in the osc 133 command span"), on `main`, not yet released (latest v19.2.1, 2026-11-25). `A` + `B` open each prompt mark, `C` + `D;0` close it in the same write. The mark wraps only the prompt's first text row, written once when it enters scrollback (#20793), so a multi-line prompt lists by its first line. They thanked @cognominal for the report and pointer, then closed #20123.
+- **Next:** once a release includes `f2b6a85da7`, check in a tuios pane that `<leader> s` lists omp prompts.
 
 ### O2 Put the user message between the OSC 133 B and C marks
 
-- **Status:** superseded by [can1357/oh-my-pi#20124](https://github.com/can1357/oh-my-pi/pull/20124) (the maintainers' bot, same fix). Do not submit. If useful, review #20124 instead: it also touches `packages/coding-agent/src/tools/browser/relay/server.ts` (a `parseFlag` import), unrelated to O1.
+- **Status:** superseded, never submitted. #20124 (the bot's version of the same fix) was closed unmerged on 2026-11-27 and the fix landed instead as `f2b6a85da7` on the new painter (see O1). The `feat/osc133` branch targets the removed `user-message.ts` and can be deleted.
 - **Claude session:** `955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`. Resume it with `cd ~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133 && claude --resume 955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7`; transcript in `~/.claude/projects/-home-cog--local-share-tuios-worktrees-can1357---oh-my-pi-feat-osc133/955da6aa-b5de-4b8a-8c6f-f479a2f0ffe7.jsonl`.
 - **Branch:** `feat/osc133` in `~/.local/share/tuios/worktrees/can1357---oh-my-pi/feat-osc133`, commit `da62163174`, on `main` at `e1a9f4b41d`. Pushed to my fork: https://github.com/cognominal/oh-my-pi/tree/feat/osc133 (remote `fork` in the worktree).
 - **Patch:** [`oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch`](oh-my-pi/0001-fix-tui-put-the-user-message-between-the-OSC-133-B-a.patch)
