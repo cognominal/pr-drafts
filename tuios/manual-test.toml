@@ -1,0 +1,7 @@
+# Config for a manual test of the hover help stack (T1-T4).
+# Default dock, plus the opt-in "help" control (T4) and the buttons.
+# Use it with: CONFIG=~/pr-drafts/tuios/manual-test.toml just sandbox
+[dock]
+left   = ["mode", "workspaces", "trail", "tape"]
+center = ["windows"]
+right  = ["help", "buttons", "transfers", "notifications", "copy-help", "cpu", "ram", "clock", "session-controls"]

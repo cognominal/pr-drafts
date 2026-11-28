@@ -174,7 +174,7 @@ Sessions are local Claude Code sessions (no web link). The full IDs and resume c
 
 # tuios: hover help (newhelp)
 
-Status as of 2026-11-28. **Approved; needs another rebase.** On 2026-11-28 Gaurav [approved the fixes](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7235618158) and will land the four together once they are rebased onto main, which has moved to b89f70f10 and now conflicts with the stack. Earlier: Gaurav reviewed the whole stack on #2448 and asked for three fixes (see T4 below); he will land the four together once they are in. All three are fixed and tested. The review was answered in [a comment on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557). The stack was then rebased onto main 3fd531be4 (T1 a28c8d4d2, T2 4731e93d5, T3 b13e1f2cf, T4 2e8171ba9) and the ceiling commit dropped, since main now has room for the stack. It was retested, force-pushed to [cognominal/tuios](https://github.com/cognominal/tuios), and the four PRs were marked ready for review, with [a note on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7175431671): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The patches here are regenerated from the rebased stack.
+Status as of 2026-11-28. **Approved; rebased locally, waiting for your force-push.** On 2026-11-28 Gaurav [approved the fixes](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7235618158) and will land the four together once they are rebased onto main. The same day the stack was rebased onto main b89f70f10 (T1 143388466, T2 1e3c870ff, T3 eb50cb44d, T4 ada55101d), the semicolon help strings were split, and everything was retested; the patches here are regenerated. Not pushed yet: the force-push to `fork` needs your approval, then post [`tuios/note-2448-rebased-2.md`](tuios/note-2448-rebased-2.md) on #2448. Manual test config: [`tuios/manual-test.toml`](tuios/manual-test.toml). Earlier: Gaurav reviewed the whole stack on #2448 and asked for three fixes (see T4 below); he will land the four together once they are in. All three are fixed and tested. The review was answered in [a comment on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557). The stack was then rebased onto main 3fd531be4 (T1 a28c8d4d2, T2 4731e93d5, T3 b13e1f2cf, T4 2e8171ba9) and the ceiling commit dropped, since main now has room for the stack. It was retested, force-pushed to [cognominal/tuios](https://github.com/cognominal/tuios), and the four PRs were marked ready for review, with [a note on #2448](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7175431671): [#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445), [#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446), [#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447), [#2448](https://github.com/Gaurav-Gosain/tuios/pull/2448). Each targets `main`, so T2–T4 also show the commits of the PRs under them. The patches here are regenerated from the rebased stack.
 
 **Trigger:** my own feature work on tuios: bringing Gaurav-Gosain/tuios#1859 (help mode) up to date.
 
@@ -195,7 +195,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2445](https://github.com/Gaurav-Gosain/tuios/pull/2445) (2026-11-24), branch `feat/newhelp-1-engine` pushed to `cognominal/tuios`; rebased and force-pushed 2026-11-25, marked ready for review the same day
 - **Activity:** 2026-11-24, I commented that the four PRs are drafts so people can look at them before they go stale, and that they are smaller than my earlier attempt (#1859) to fit Gaurav's directives. No review yet. Only the GitGuardian check runs on T1–T4; it passes.
-- **Commit:** a28c8d4d2 on origin/main 3fd531be4 (rebased 2026-11-25; before: the ceiling commit 7d91c76e4, then a49e8b84f, on 4c12ece99)
+- **Commit:** 143388466 on origin/main b89f70f10 (rebased 2026-11-28, local only until pushed; before: a28c8d4d2 on 3fd531be4, rebased 2026-11-25; before: the ceiling commit 7d91c76e4, then a49e8b84f, on 4c12ece99)
 - **Patch:** [`tuios/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch`](tuios/0001-feat-hover-help-explains-the-dock-and-the-desktop.patch)
 - **PR body:** [`tuios/pr1-engine.md`](tuios/pr1-engine.md)
 - **Tested:**
@@ -213,7 +213,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 ### T2 Hover help explains the rail and the panes
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2446](https://github.com/Gaurav-Gosain/tuios/pull/2446) (2026-11-24), branch `feat/newhelp-2-rail-panes` pushed to `cognominal/tuios`; rebased and force-pushed 2026-11-25, marked ready for review the same day
-- **Commit:** 4731e93d5 on T1 a28c8d4d2
+- **Commit:** 1e3c870ff on T1 143388466 (before: 4731e93d5)
 - **Patch:** [`tuios/0002-feat-hover-help-explains-the-rail-and-the-panes.patch`](tuios/0002-feat-hover-help-explains-the-rail-and-the-panes.patch)
 - **PR body:** [`tuios/pr2-rail-panes.md`](tuios/pr2-rail-panes.md)
 - **Tested:**
@@ -230,7 +230,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 ### T3 Hover help stands aside for the leader menu
 
 - **Status:** submitted as a draft, [Gaurav-Gosain/tuios#2447](https://github.com/Gaurav-Gosain/tuios/pull/2447) (2026-11-24), branch `feat/newhelp-3-leader` pushed to `cognominal/tuios`; rebased and force-pushed 2026-11-25, marked ready for review the same day
-- **Commit:** b13e1f2cf on T2 4731e93d5
+- **Commit:** eb50cb44d on T2 1e3c870ff (before: b13e1f2cf)
 - **Patch:** [`tuios/0003-feat-hover-help-stands-aside-for-the-leader-menu.patch`](tuios/0003-feat-hover-help-stands-aside-for-the-leader-menu.patch)
 - **PR body:** [`tuios/pr3-leader.md`](tuios/pr3-leader.md)
 - **Tested:**
@@ -253,7 +253,7 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
   2. Fixed in T1. The defaults are now ctrl+alt+arrows to walk, ctrl+alt+pgup/pgdown to scroll, and alt+shift+h, which no other table binds. Your choice of keys. `TestHoverHelpShadowsNoDefaultBinding` presses every section's defaults with hover help on. `TestDefaultHelpKeysAreBoundInNoOtherTable` checks the help defaults against every table, including the GUI client's. Each found 14 clashes on the old keys. `docs/KEYBINDINGS.md` warns that Ghostty on Linux keeps ctrl+alt+arrows.
   3. Fixed in T2. Each part has a layer: the desktop, then each pane at `HitZ`+1, then the dock and the rail. The pointer picks the highest layer, then the smallest part. `TestHoverHelpExplainsThePaneOnTop` fails without the fix.
   The negative controls are in `e2e/tui/NEGATIVE_CONTROLS.md`.
-- **Commit:** 2e8171ba9 on T3 b13e1f2cf
+- **Commit:** ada55101d on T3 eb50cb44d (before: 2e8171ba9)
 - **Patch:** [`tuios/0004-feat-an-opt-in-control-on-the-dock-for-hover-help.patch`](tuios/0004-feat-an-opt-in-control-on-the-dock-for-hover-help.patch)
 - **PR body:** [`tuios/pr4-dock-control.md`](tuios/pr4-dock-control.md)
 - **Tested:**
@@ -269,7 +269,14 @@ All four are ready for review. After the rebase the stack fits under the 50,000,
 - **Reply to the review:** [`tuios/reply-2448-review.md`](tuios/reply-2448-review.md), [posted](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7174953557) 2026-11-25
 - **Note on the rebase:** [`tuios/note-2448-rebased.md`](tuios/note-2448-rebased.md), [posted](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7175431671) 2026-11-25
 - **Approval:** 2026-11-28, Gaurav [wrote](https://github.com/Gaurav-Gosain/tuios/pull/2448#issuecomment-7235618158) that all three fixes look right and that the shadowing test found real clashes. Once the four are rebased onto main he will land them together, and on the way in split the few help strings that use a semicolon into two sentences, to match the rest of the UI text. Main has since moved to b89f70f10 (2026-11-28), and GitHub reports all four PRs as conflicting.
-- **Next:** rebase the stack onto b89f70f10 with `scripts/rebase.sh --update-refs origin/main`, retest, force-push, regenerate the patches, and post a short note on #2448. Optionally split the semicolon help strings ourselves to save him the edit.
+- **Rebase (2026-11-28):** onto main b89f70f10 with `scripts/rebase.sh --update-refs origin/main`. Only T1 conflicted: main's new Files view and hover help touched the same lines in `internal/config/actions.go` (actions), `internal/config/registry.go` (`contextOnlyScope` gains `ScopeFiles` and `ScopeHelp`) and `internal/input/reachability_test.go` (sections `k.Files` and `k.Help`); both sides kept. The seven help strings with a semicolon were split into two sentences, through fixups in their own commits (five in T1, one in T2, one in T4).
+- **Retested (2026-11-28):**
+  - hover help e2e, real and sim: T1 8, T2 11, T3 12, T4 13, all pass
+  - unit tests of `internal/config`, `internal/input`, `internal/app` pass, so the help keys clash with none of the Files view's
+  - `just check --changed` green (`fix` reports one `SplitSeq` hint in `hover_help_test.go`, not a failure)
+  - size at the head against main: linux/amd64 +135,168, darwin/arm64 +116,384, windows/amd64 +137,216; main's ceiling is now 60,000,000
+  - builds need `GOTMPDIR=~/.cache/gotmp` on this machine: `/tmp` is a nearly full tmpfs and the linker fails with "disk quota exceeded"
+- **Next:** force-push the four branches to `fork` (cognominal/tuios), post [`tuios/note-2448-rebased-2.md`](tuios/note-2448-rebased-2.md) on #2448, then Gaurav lands them.
 
 ---
 

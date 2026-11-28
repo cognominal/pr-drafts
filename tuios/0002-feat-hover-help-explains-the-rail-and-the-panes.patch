@@ -1,4 +1,4 @@
-From 4731e93d5199b80112b6b9fd84095b390c57bbcb Mon Sep 17 00:00:00 2001
+From 1e3c870ff5e5b06c214b8278a4f5f048c757cb2f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 23:30:21 +0100
 Subject: [PATCH 2/4] feat: hover help explains the rail and the panes
@@ -28,13 +28,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  create mode 100644 internal/app/hover_help_parts.go
 
 diff --git a/e2e/tui/NEGATIVE_CONTROLS.md b/e2e/tui/NEGATIVE_CONTROLS.md
-index b1465038b..28411fffe 100644
+index 1757202d5..753e4b9fe 100644
 --- a/e2e/tui/NEGATIVE_CONTROLS.md
 +++ b/e2e/tui/NEGATIVE_CONTROLS.md
-@@ -19731,3 +19731,18 @@ placeholders, and zooms, drags and fits the picture.
- 
- Repeat from `e2e/tui` with
- `TUIOS_E2E=1 TUIOS_E2E_BIN=/path/to/tuios go test -count=1 -run '^TestCockpitImageViewZooms$' -v .`.
+@@ -19906,3 +19906,18 @@ editor, as dash does.
+ | The `spPrompt` calls left out (the tree before the fix) | `TestPhoneStreamsAPaneAndAnswersTheInbox`, `TestStreamPaneHeldToTheLinkPolicy`, `TestStreamPaneLeaseChurn`, `TestStreamPaneFromAPane` | `no SZ- line showed`, with `sh-3.2$ SZ-22x78` on the screen | **caught** |
+ | With the fix, the same forced runs | the 8 tests that use `limitsDaemon` or `spSize` | 8 of 8 pass | n/a |
+ | With the fix, no forced start, `-count=3` | the same 8 tests | 24 of 24 pass | n/a |
 +## Hover help: the meters and the pane on top
 +
 +Two fixes from the review of the hover help pull requests. The CPU and RAM readouts share one dock segment, and each recorded its columns with the segment's two-column margin counted in, so the first two columns of the RAM readout explained the CPU. The pointer picked the part with the smallest rectangle under it, so a pane hidden under a larger floating pane or popup was explained through it.
@@ -269,7 +269,7 @@ index 43d98bbaf..20181a09a 100644
 +	}
 +}
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index ea2b71cab..761900e7d 100644
+index 5764da7f1..e2ca53f43 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
 @@ -2,6 +2,7 @@ package app
@@ -400,7 +400,7 @@ index ea2b71cab..761900e7d 100644
  		}
 diff --git a/internal/app/hover_help_parts.go b/internal/app/hover_help_parts.go
 new file mode 100644
-index 000000000..1533b0dbe
+index 000000000..3edb8ae27
 --- /dev/null
 +++ b/internal/app/hover_help_parts.go
 @@ -0,0 +1,306 @@
@@ -520,7 +520,7 @@ index 000000000..1533b0dbe
 +	case sidebarSectionSessions:
 +		c.id, c.title = "rail/sessions", "Sessions"
 +		c.purpose = "One row per session, on this machine and on the hosts it links to. " +
-+			"Enter attaches the session under the cursor; the number before a name is " +
++			"Enter attaches the session under the cursor. The number before a name is " +
 +			"its jump key. The + in the header makes a new one."
 +		c.keys = m.helpScopedKeys(config.TableSidebar, config.ScopeSidebar,
 +			"activate", "new_session", "jump_1", "reorder_down", "reorder_up", "menu")
@@ -651,7 +651,7 @@ index 000000000..1533b0dbe
 +	return helpComponent{
 +		id:    "pane:" + w.ID,
 +		title: "Pane: " + name,
-+		purpose: "One terminal. It runs its own program; in terminal mode the keys go " +
++		purpose: "One terminal. It runs its own program. In terminal mode the keys go " +
 +			"to that program, and in window mode they move and arrange the panes. The " +
 +			"title bar names it, when it has one, and the body is the terminal.",
 +		keys: helpCap(keys, 7),

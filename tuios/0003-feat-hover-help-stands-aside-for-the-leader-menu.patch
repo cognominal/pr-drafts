@@ -1,4 +1,4 @@
-From b13e1f2cf7a07ceaa1ee2d492a52693f26e988af Mon Sep 17 00:00:00 2001
+From eb50cb44d59421e86ff30a2373cadbe182a9418c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Sat, 21 Nov 2026 00:42:48 +0100
 Subject: [PATCH 3/4] feat: hover help stands aside for the leader menu
@@ -17,10 +17,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  3 files changed, 47 insertions(+), 5 deletions(-)
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 1d8313937..8e2c1203e 100644
+index 48d9011ca..38c92e691 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -977,7 +977,9 @@ mode and reorder the rail. Some host terminals and desktops keep `Ctrl+Alt`
+@@ -978,7 +978,9 @@ mode and reorder the rail. Some host terminals and desktops keep `Ctrl+Alt`
  with the arrows for themselves, Ghostty on Linux among them; bind other keys
  there. A click goes to what it lands on. A
  click on the explanation does nothing. The wheel scrolls the explanation when
@@ -92,7 +92,7 @@ index 20181a09a..64ee2be70 100644
 +	saveArtifact(t, term, dir, "2-back")
 +}
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index 761900e7d..4e21489d9 100644
+index e2ca53f43..0e9a35173 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
 @@ -220,7 +220,9 @@ func (m *OS) HelpToggleKeys() {

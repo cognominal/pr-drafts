@@ -1,4 +1,4 @@
-From a28c8d4d276bbb600118977231ebc39946d24b9c Mon Sep 17 00:00:00 2001
+From 1433884663845e5ffc7f355974d2057699fd69e0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Fri, 20 Nov 2026 22:59:18 +0100
 Subject: [PATCH 1/4] feat: hover help explains the dock and the desktop
@@ -63,10 +63,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  create mode 100644 internal/input/hover_help.go
 
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 2e6cc8598..1d8313937 100644
+index 5738f577e..48d9011ca 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -946,6 +946,50 @@ the text into the focused pane. This action has no default key. Bind it, or
+@@ -947,6 +947,50 @@ the text into the focused pane. This action has no default key. Bind it, or
  run it from the command palette. Set `hints.all_panes = true` to make
  `Ctrl+B F` do the same.
  
@@ -118,10 +118,10 @@ index 2e6cc8598..1d8313937 100644
  
  `Ctrl+click` on a link opens it. `Shift+click` also opens it, but most
 diff --git a/docs/keybindings-defaults.md b/docs/keybindings-defaults.md
-index 7293ca65a..982ae0868 100644
+index 683bae1b5..cb2522910 100644
 --- a/docs/keybindings-defaults.md
 +++ b/docs/keybindings-defaults.md
-@@ -412,6 +412,18 @@ Run `tuios keybinds list` to see the keys that your config sets.
+@@ -470,6 +470,18 @@ Run `tuios keybinds list` to see the keys that your config sets.
  | `D` | `review_unstage_file` | Review: unstage the whole file |
  | `d` | `review_unstage_hunk` | Review: unstage the hunk under the cursor |
  
@@ -140,7 +140,7 @@ index 7293ca65a..982ae0868 100644
  ## Prefix (ctrl+b)
  
  | Keys | Action | Description |
-@@ -492,6 +504,7 @@ Run `tuios keybinds list` to see the keys that your config sets.
+@@ -550,6 +562,7 @@ Run `tuios keybinds list` to see the keys that your config sets.
  | `ctrl+b right` | `terminal_focus_right` | Focus the pane to the right |
  | `ctrl+b Z` | `toggle_calm` | Calm mode |
  | `ctrl+b ?` | `toggle_help` | Toggle help |
@@ -520,7 +520,7 @@ index 308c95170..5cee64074 100644
  // message is a transient claim on the right-hand end rather than a cell, so
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
 new file mode 100644
-index 000000000..ea2b71cab
+index 000000000..5764da7f1
 --- /dev/null
 +++ b/internal/app/hover_help.go
 @@ -0,0 +1,977 @@
@@ -1042,14 +1042,14 @@ index 000000000..ea2b71cab
 +		c.cli = []string{"tuios plugins list", "tuios list-dock-components"}
 +	case name == config.DockComponentWorkspaces:
 +		c.title = "Workspaces"
-+		c.purpose = "The workspace strip. Each pill is a workspace and its panes; clicking " +
++		c.purpose = "The workspace strip. Each pill is a workspace and its panes. Clicking " +
 +			"one switches to it, and the arrows step a strip too long for the dock."
 +		c.keys = m.helpKeys("prefix_workspace", "prefix_workspace_switcher", "next_workspace", "prev_workspace")
 +		c.cli = []string{"tuios select-workspace 2", "tuios set-workspace-name 2 work",
 +			"tuios set-config appearance.dock_workspace_tabs true"}
 +	case name == config.DockComponentWindows:
 +		c.title = "Minimized panes"
-+		c.purpose = "One entry per minimized pane. Clicking an entry restores that pane; the " +
++		c.purpose = "One entry per minimized pane. Clicking an entry restores that pane. The " +
 +			"overflow marker opens the list of entries the dock had no room for."
 +		for i, hit := range m.dockItemHits {
 +			if hit.WindowIndex >= 0 && hit.WindowIndex < len(m.Windows) && m.Windows[hit.WindowIndex] != nil {
@@ -1057,7 +1057,7 @@ index 000000000..ea2b71cab
 +			}
 +		}
 +		if n := m.dockOverflowHit.Overflowed; n > 0 {
-+			c.rows = append(c.rows, helpKey{press: "...", desc: strconv.Itoa(n) + " more did not fit; the marker opens them"})
++			c.rows = append(c.rows, helpKey{press: "...", desc: strconv.Itoa(n) + " more did not fit. The marker opens them"})
 +		}
 +		c.keys = m.helpKeys("prefix_minimize", "restore_all")
 +		c.cli = []string{"tuios list-windows", "tuios set-config appearance.dock_compact true"}
@@ -1106,7 +1106,7 @@ index 000000000..ea2b71cab
 +	case name == config.DockComponentButtons:
 +		c.title = "Buttons"
 +		c.purpose = "Buttons for the things a person new to tuios looks for first. Each one " +
-+			"does what its key does; on a narrow dock they lose their words, then fold into a more button."
++			"does what its key does. On a narrow dock they lose their words, then fold into a more button."
 +		for _, i := range m.dockButtonRow() {
 +			for _, k := range m.helpKeys(dockButtons[i].action) {
 +				k.desc = dockButtons[i].label + ": " + k.desc
@@ -1502,7 +1502,7 @@ index 000000000..ea2b71cab
 +	return clamp(cx, anchor.Max.Y+gap)
 +}
 diff --git a/internal/app/os.go b/internal/app/os.go
-index 99b9a2119..6d85893dd 100644
+index fa0f2c4f2..75b68d627 100644
 --- a/internal/app/os.go
 +++ b/internal/app/os.go
 @@ -470,14 +470,21 @@ type OS struct {
@@ -1536,7 +1536,7 @@ index 99b9a2119..6d85893dd 100644
  	// the hosts that cannot Send into the program directly. See dock_remote.go.
  	RemoteCommandChan chan RemoteCommandMsg
 diff --git a/internal/app/program_options.go b/internal/app/program_options.go
-index de7325a63..d5029d37a 100644
+index c175eb61c..29cbd39e2 100644
 --- a/internal/app/program_options.go
 +++ b/internal/app/program_options.go
 @@ -280,6 +280,12 @@ func FilterMouseMotion(model tea.Model, msg tea.Msg) tea.Msg {
@@ -1650,13 +1650,13 @@ index cd24d1e22..4ad5a43a7 100644
  	m.dockOverflowHit = dockOverflowHit{}
  	if overflowX1 > overflowX0 {
 diff --git a/internal/config/actions.go b/internal/config/actions.go
-index 7a7b9091f..998998b1d 100644
+index 66a8811a8..5f096bd38 100644
 --- a/internal/config/actions.go
 +++ b/internal/config/actions.go
-@@ -127,6 +127,15 @@ var actionTable = [...]ActionSpec{
- 	{Name: "transfers_clear", Desc: "Copies: remove the copies that ended", Run: RunView},
- 	{Name: "transfers_answer", Desc: "Copies: answer a copy that waits for an answer", Run: RunView},
- 	{Name: "transfers_close", Desc: "Copies: close the panel", Run: RunView},
+@@ -181,6 +181,15 @@ var actionTable = [...]ActionSpec{
+ 	{Name: "files_tab_7", Desc: "Files: go to tab 7", Run: RunView},
+ 	{Name: "files_tab_8", Desc: "Files: go to tab 8", Run: RunView},
+ 	{Name: "files_tab_9", Desc: "Files: go to tab 9", Run: RunView},
 +	// Hover help: the explainer's keys, read while it is up and no panel,
 +	// prefix or menu owns the keyboard.
 +	{Name: "help_next", Desc: "Hover help: explain the next component", Run: RunView},
@@ -1669,7 +1669,7 @@ index 7a7b9091f..998998b1d 100644
  
  	{Name: "list_up", Desc: "Lists: up one row", Run: RunView},
  	{Name: "list_down", Desc: "Lists: down one row", Run: RunView},
-@@ -356,6 +365,7 @@ var actionTable = [...]ActionSpec{
+@@ -410,6 +419,7 @@ var actionTable = [...]ActionSpec{
  	{Name: "enter_window_mode", Desc: "Enter window management mode"},
  	{Name: "hold_window_mode", Desc: "Hold for window management mode", Run: RunView},
  	{Name: "toggle_help", Desc: "Toggle help", Mobile: MobileButton{Label: "help", Order: 11}, Aliases: []Action{"prefix_help"}},
@@ -1758,26 +1758,26 @@ index 000000000..830e67391
 +	}
 +}
 diff --git a/internal/config/keybind_scopes.go b/internal/config/keybind_scopes.go
-index 7b3f82e62..fa1f380d7 100644
+index e5cd35d82..b7684aad4 100644
 --- a/internal/config/keybind_scopes.go
 +++ b/internal/config/keybind_scopes.go
-@@ -79,6 +79,7 @@ const (
- 	SectionTransfers        = "transfers"
+@@ -80,6 +80,7 @@ const (
+ 	SectionFiles            = "files"
  	SectionCopyMode         = "copy_mode"
  	SectionReview           = "review"
 +	SectionHelp             = "help"
  	SectionGlobal           = "global"
  	SectionScript           = "script"
  	SectionLists            = "lists"
-@@ -101,6 +102,7 @@ const (
- 	ScopeTransfers      = "transfers"
+@@ -103,6 +104,7 @@ const (
+ 	ScopeFiles          = "files"
  	ScopeCopyMode       = "copy"
  	ScopeReview         = "review"
 +	ScopeHelp           = "help"
  	ScopePrefix         = "prefix"
  	ScopePrefixWindow   = "prefix.window"
  	ScopePrefixMinimize = "prefix.minimize"
-@@ -226,6 +228,16 @@ func Scopes(leader string) []Scope {
+@@ -235,6 +237,16 @@ func Scopes(leader string) []Scope {
  			Sections: []string{SectionReview},
  			Reaches:  ReachModal,
  		},
@@ -1795,7 +1795,7 @@ index 7b3f82e62..fa1f380d7 100644
  			ID: ScopePrefix, Name: "Prefix", Chord: leader,
  			Sections: []string{SectionPrefixMode},
 diff --git a/internal/config/keybind_tables.go b/internal/config/keybind_tables.go
-index 0cad450ba..811f8a6b6 100644
+index 2012e920b..15660c686 100644
 --- a/internal/config/keybind_tables.go
 +++ b/internal/config/keybind_tables.go
 @@ -35,6 +35,7 @@ const (
@@ -1806,7 +1806,7 @@ index 0cad450ba..811f8a6b6 100644
  	TableGUI
  	TableGlobal
  	TableScript
-@@ -83,6 +84,7 @@ var keybindTables = [tableCount]keybindTable{
+@@ -84,6 +85,7 @@ var keybindTables = [tableCount]keybindTable{
  	TableTransfers:        {SectionTransfers, func(k *KeybindingsConfig) *map[string][]string { return &k.Transfers }},
  	TableCopyMode:         {SectionCopyMode, func(k *KeybindingsConfig) *map[string][]string { return &k.CopyMode }},
  	TableReview:           {SectionReview, func(k *KeybindingsConfig) *map[string][]string { return &k.Review }},
@@ -1835,23 +1835,23 @@ index bb28cf971..ba66867be 100644
  prefix_select_0 = ["0"]
  prefix_select_1 = ["1"]
 diff --git a/internal/config/registry.go b/internal/config/registry.go
-index c875df600..710f9d5c6 100644
+index cc15edfff..9a02f4f8f 100644
 --- a/internal/config/registry.go
 +++ b/internal/config/registry.go
 @@ -421,7 +421,7 @@ func buildPressesByAction(r *KeybindRegistry) map[string][]string {
  // no chord that would say so.
  func contextOnlyScope(scope string) bool {
  	switch scope {
--	case ScopeSidebar, ScopeSidebarFiles, ScopeSidebarAgents, ScopeQuickLook, ScopeQuickLookIn, ScopeScript, ScopeLists, ScopeInbox, ScopeInboxPeek, ScopeMail, ScopeTransfers, ScopeCopyMode, ScopeReview:
-+	case ScopeSidebar, ScopeSidebarFiles, ScopeSidebarAgents, ScopeQuickLook, ScopeQuickLookIn, ScopeScript, ScopeLists, ScopeInbox, ScopeInboxPeek, ScopeMail, ScopeTransfers, ScopeCopyMode, ScopeReview, ScopeHelp:
+-	case ScopeSidebar, ScopeSidebarFiles, ScopeSidebarAgents, ScopeQuickLook, ScopeQuickLookIn, ScopeScript, ScopeLists, ScopeInbox, ScopeInboxPeek, ScopeMail, ScopeTransfers, ScopeFiles, ScopeCopyMode, ScopeReview:
++	case ScopeSidebar, ScopeSidebarFiles, ScopeSidebarAgents, ScopeQuickLook, ScopeQuickLookIn, ScopeScript, ScopeLists, ScopeInbox, ScopeInboxPeek, ScopeMail, ScopeTransfers, ScopeFiles, ScopeCopyMode, ScopeReview, ScopeHelp:
  		return true
  	case ScopeGUI:
  		// Only the GUI reads these keys. A terminal's help that listed
 diff --git a/internal/config/userconfig.go b/internal/config/userconfig.go
-index 02ce1fb34..6b8186188 100644
+index 9566884da..c3a853aca 100644
 --- a/internal/config/userconfig.go
 +++ b/internal/config/userconfig.go
-@@ -1306,6 +1306,10 @@ type KeybindingsConfig struct {
+@@ -1322,6 +1322,10 @@ type KeybindingsConfig struct {
  	// Review binds are live while the review overlay is open and no note is
  	// being typed: its hunk and file motions. See getDefaultReviewKeybinds.
  	Review map[string][]string `toml:"review"`
@@ -1862,7 +1862,7 @@ index 02ce1fb34..6b8186188 100644
  	// GUI binds are read only by a native GUI client (tuios-gpui), through
  	// the GUI bridge's keybinds event. They are desktop chords that need no
  	// leader, such as ctrl+shift+t. The terminal client never looks them up,
-@@ -1752,6 +1756,9 @@ func DefaultConfig() *UserConfig {
+@@ -1768,6 +1772,9 @@ func DefaultConfig() *UserConfig {
  				// makes a window and t is the window prefix. y is the key the
  				// multifocus docs tell people to bind, so it stays free.
  				"prefix_transfers": {"u"},
@@ -1872,15 +1872,15 @@ index 02ce1fb34..6b8186188 100644
  				// E opens the scrollback in the editor, one shift from the e
  				// that focuses the rail. Copy mode has it on ctrl+g.
  				ActionEditScrollback: {"E"},
-@@ -1877,6 +1884,7 @@ func DefaultConfig() *UserConfig {
- 			Transfers:       getDefaultTransfersKeybinds(),
+@@ -1894,6 +1901,7 @@ func DefaultConfig() *UserConfig {
+ 			Files:           getDefaultFilesKeybinds(),
  			CopyMode:        getDefaultCopyModeKeybinds(),
  			Review:          getDefaultReviewKeybinds(),
 +			Help:            getDefaultHelpKeybinds(),
  			GUI:             getDefaultGUIKeybinds(),
  			Global: map[string][]string{
  				// ctrl+p is fish's history-back and vim's keyword completion, and
-@@ -3890,6 +3898,8 @@ func fillMissingKeybinds(cfg, defaultCfg *UserConfig) {
+@@ -4029,6 +4037,8 @@ func fillMissingKeybinds(cfg, defaultCfg *UserConfig) {
  	fillMapDefaults(cfg.Keybindings.CopyMode, defaultCfg.Keybindings.CopyMode)
  	// The review overlay's section is newer than every config written before it.
  	fillMapDefaults(cfg.Keybindings.Review, defaultCfg.Keybindings.Review)
@@ -1889,7 +1889,7 @@ index 02ce1fb34..6b8186188 100644
  	// The GUI section is newer than every config written before it.
  	fillMapDefaults(cfg.Keybindings.GUI, defaultCfg.Keybindings.GUI)
  
-@@ -3953,6 +3963,8 @@ var yieldingDefaults = map[string]bool{
+@@ -4092,6 +4102,8 @@ var yieldingDefaults = map[string]bool{
  	// between machines.
  	"prefix_transfers": true,
  	"file_send":        true,
@@ -1899,7 +1899,7 @@ index 02ce1fb34..6b8186188 100644
  	// editor keys.
  	ActionEditScrollback: true,
 diff --git a/internal/config/whichkey_menu.go b/internal/config/whichkey_menu.go
-index bf1be5e99..57c6dc45d 100644
+index 5037e0de3..e110c6b6a 100644
 --- a/internal/config/whichkey_menu.go
 +++ b/internal/config/whichkey_menu.go
 @@ -227,6 +227,7 @@ var leaderToolRows = []menuRow{
@@ -1911,7 +1911,7 @@ index bf1be5e99..57c6dc45d 100644
  
  // leaderAgentRows is the leader menu's Agents section.
 diff --git a/internal/input/actions.go b/internal/input/actions.go
-index 2d639ab4a..b66d50da1 100644
+index a397d6f90..d0cf1994e 100644
 --- a/internal/input/actions.go
 +++ b/internal/input/actions.go
 @@ -212,6 +212,7 @@ func (d *ActionDispatcher) registerHandlers() {
@@ -1923,12 +1923,12 @@ index 2d639ab4a..b66d50da1 100644
  	d.Register("open_keybind_presets", func(_ tea.KeyPressMsg, o *app.OS) (*app.OS, tea.Cmd) {
  		o.OpenKeybindPresets()
 diff --git a/internal/input/handler.go b/internal/input/handler.go
-index 0bf694e68..23486d5d9 100644
+index de71f8a3a..4eee8469a 100644
 --- a/internal/input/handler.go
 +++ b/internal/input/handler.go
 @@ -81,6 +81,11 @@ func HandleInput(msg tea.Msg, o *app.OS) (tea.Model, tea.Cmd) {
  		if o.ReviewOpen() {
- 			return o, nil
+ 			return handleReviewMouseClick(msg, o)
  		}
 +		// The explainer is text to read, so a click on it does nothing. A
 +		// click anywhere else reaches what it lands on. See hover_help.go.
@@ -1938,8 +1938,8 @@ index 0bf694e68..23486d5d9 100644
  		if o.ShowScrollbackBrowser {
  			result, cmd = handleScrollbackBrowserMouseClick(msg, o)
  		} else {
-@@ -98,6 +103,9 @@ func HandleInput(msg tea.Msg, o *app.OS) (tea.Model, tea.Cmd) {
- 		if o.ReviewOpen() {
+@@ -99,6 +104,9 @@ func HandleInput(msg tea.Msg, o *app.OS) (tea.Model, tea.Cmd) {
+ 			o.ReviewMouseDrag(msg.X, msg.Y)
  			return o, nil
  		}
 +		// Hover help explains what the pointer is over. The motion then goes
@@ -1948,7 +1948,7 @@ index 0bf694e68..23486d5d9 100644
  		if o.ShowScrollbackBrowser {
  			result, cmd = handleScrollbackBrowserMouseMotion(msg, o)
  			// Don't sync motion events
-@@ -154,6 +162,16 @@ func HandleInput(msg tea.Msg, o *app.OS) (tea.Model, tea.Cmd) {
+@@ -163,6 +171,16 @@ func HandleInput(msg tea.Msg, o *app.OS) (tea.Model, tea.Cmd) {
  			}
  			return o, nil
  		}
@@ -1965,7 +1965,7 @@ index 0bf694e68..23486d5d9 100644
  		if o.ScreenshotPreviewOpen() {
  			result, cmd = handleScreenshotPreviewWheel(msg, o)
  		} else if o.ShowScrollbackBrowser {
-@@ -420,6 +438,12 @@ func HandleKeyPress(msg tea.KeyPressMsg, o *app.OS) (*app.OS, tea.Cmd) {
+@@ -429,6 +447,12 @@ func HandleKeyPress(msg tea.KeyPressMsg, o *app.OS) (*app.OS, tea.Cmd) {
  		o.CaptureKeyEvent(msg)
  	}
  
@@ -2033,10 +2033,10 @@ index 000000000..b8eacfe60
 +	return true
 +}
 diff --git a/internal/input/reachability_test.go b/internal/input/reachability_test.go
-index 0e3c44890..3e73cb11e 100644
+index 13332ab61..610dc4e3d 100644
 --- a/internal/input/reachability_test.go
 +++ b/internal/input/reachability_test.go
-@@ -168,9 +168,21 @@ func reachSections(t *testing.T) []bindingSection {
+@@ -170,9 +170,21 @@ func reachSections(t *testing.T) []bindingSection {
  		{name: "copy_mode", binds: k.CopyMode, modes: bothModes, newOS: reachCopyModeOS},
  		// The review overlay owns the keyboard in either mode while it is open.
  		{name: "review", binds: k.Review, modes: bothModes, newOS: reachReviewOS},
@@ -2058,7 +2058,7 @@ index 0e3c44890..3e73cb11e 100644
  // reachReviewOS is a client with the review overlay open on a diff.
  func reachQuickLookOS(t *testing.T) *app.OS {
  	t.Helper()
-@@ -269,8 +281,30 @@ func reachMailOS(t *testing.T) *app.OS {
+@@ -282,8 +294,30 @@ func reachMailOS(t *testing.T) *app.OS {
  // handler can see them, and the eight negative controls that mutate a handler
  // all pass while the feature is dead.
  func TestEveryDefaultBindingReachesItsAction(t *testing.T) {
@@ -2089,7 +2089,7 @@ index 0e3c44890..3e73cb11e 100644
  		for _, mode := range sec.modes {
  			for _, action := range sortedActions(sec.binds) {
  				for _, key := range sec.binds[action] {
-@@ -280,6 +314,9 @@ func TestEveryDefaultBindingReachesItsAction(t *testing.T) {
+@@ -293,6 +327,9 @@ func TestEveryDefaultBindingReachesItsAction(t *testing.T) {
  							t.Skipf("%s is bound ahead of its work (%s)", action, unit)
  						}
  						o := sec.newOS(t)
@@ -2099,12 +2099,12 @@ index 0e3c44890..3e73cb11e 100644
  						o.Mode = mode
  						if sec.leader {
  							o = pressKey(t, o, k.LeaderKey)
-@@ -891,7 +928,7 @@ func TestEveryDescribedActionIsHandled(t *testing.T) {
+@@ -904,7 +941,7 @@ func TestEveryDescribedActionIsHandled(t *testing.T) {
  	// below does not name it; runCopyModeAction runs it through its constant.
  	handled := map[string]bool{app.HoldModeAction: true, config.ActionCopyModeFirstNonBlank: true}
  	k := config.DefaultConfig().Keybindings
--	for _, section := range []map[string][]string{k.Inbox, k.InboxPeek, k.Mail, k.SidebarAgents, k.CopyMode, k.Transfers, k.Lists, k.Review} {
-+	for _, section := range []map[string][]string{k.Inbox, k.InboxPeek, k.Mail, k.SidebarAgents, k.CopyMode, k.Transfers, k.Lists, k.Review, k.Help} {
+-	for _, section := range []map[string][]string{k.Inbox, k.InboxPeek, k.Mail, k.SidebarAgents, k.CopyMode, k.Transfers, k.Files, k.Lists, k.Review} {
++	for _, section := range []map[string][]string{k.Inbox, k.InboxPeek, k.Mail, k.SidebarAgents, k.CopyMode, k.Transfers, k.Files, k.Lists, k.Review, k.Help} {
  		for action := range section {
  			handled[action] = true
  		}

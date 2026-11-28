@@ -52,7 +52,7 @@ Also checked:
 - `just check --changed`: all checks pass.
 - The unit tests of config, app, input and cmd/tuios pass.
 - `TestIdleCostStaysLow`: pass.
-- Size at the head of the stack: linux/amd64 49,590,432 bytes, darwin/arm64 46,170,834, windows/amd64 49,986,048 (13,952 under the 50,000,000 ceiling). The review fixes cost 512 bytes on windows/amd64 and nothing on linux/amd64.
+- Size at the head of the stack, rebased on main b89f70f10 (2026-11-28): linux/amd64 50,471,072 bytes (+135,168 against main), darwin/arm64 46,983,090 (+116,384), windows/amd64 50,866,176 (+137,216). Main's ceiling is now 60,000,000.
 
 ## Merge Danger
 

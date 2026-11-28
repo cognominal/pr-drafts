@@ -1,4 +1,4 @@
-From 2e8171ba9dc9f513cf2ab23bfcbf25f2eadd261c Mon Sep 17 00:00:00 2001
+From ada55101d4231394c89691e2fd957dec82493339 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Payrard?= <cognominal@gmail.com>
 Date: Sat, 21 Nov 2026 00:54:39 +0100
 Subject: [PATCH 4/4] feat: an opt-in ? control on the dock for hover help
@@ -23,10 +23,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  9 files changed, 120 insertions(+), 12 deletions(-)
 
 diff --git a/docs/CONFIGURATION.md b/docs/CONFIGURATION.md
-index c1444c236..2f5f071a8 100644
+index 509d2b3ed..915fec4d6 100644
 --- a/docs/CONFIGURATION.md
 +++ b/docs/CONFIGURATION.md
-@@ -2276,6 +2276,8 @@ exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a
+@@ -2294,6 +2294,8 @@ exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a
  count and a percent, `3 copies 42%`. `waiting` means a link is down, and
  `1 failed` stays until you open the Copies panel. A click opens the panel. Add
  `transfers` to your own `right` list to see it there.
@@ -35,7 +35,7 @@ index c1444c236..2f5f071a8 100644
  `session` shows the session name, workspace and pane, `main 2:1`, and is in no
  default list. `[dock.session]` takes `format` (`{session}`, `{workspace}`,
  `{pane}`) and the cell style keys `fg`, `bg`, `bold`, `cap_left` and
-@@ -5356,7 +5358,7 @@ on-click = "tuios new-window log -- git log --oneline -20"
+@@ -5384,7 +5386,7 @@ on-click = "tuios new-window log -- git log --oneline -20"
  
  These lists are the default. A missing list uses the default. An empty list (`left = []`) draws nothing on that side.
  
@@ -44,7 +44,7 @@ index c1444c236..2f5f071a8 100644
  
  `session-controls` shows an agents button when the session has an agent pane. The button opens the agents view, the same as `Ctrl+B i`. When agents wait for you, the button shows how many in the attention colour.
  
-@@ -5364,6 +5366,8 @@ The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `t
+@@ -5392,6 +5394,8 @@ The built-in components are `mode`, `workspaces`, `trail`, `tape`, `windows`, `t
  
  `transfers` shows the copies between machines. It shows nothing while no copy exists. One copy is a bar and a percent, `[####--] 61%`. More copies are a count and a percent, `3 copies 42%`. `waiting` means a link is down. `1 failed` stays until you open the Copies panel. A click opens the [Copies panel](KEYBINDINGS.md#copies-between-machines).
  
@@ -54,10 +54,10 @@ index c1444c236..2f5f071a8 100644
  
  ### Custom components
 diff --git a/docs/KEYBINDINGS.md b/docs/KEYBINDINGS.md
-index 8e2c1203e..d6c766380 100644
+index 38c92e691..bd7d005bd 100644
 --- a/docs/KEYBINDINGS.md
 +++ b/docs/KEYBINDINGS.md
-@@ -992,6 +992,15 @@ help_keys = ["alt+shift+k"]
+@@ -993,6 +993,15 @@ help_keys = ["alt+shift+k"]
  
  `?` still shows the list of all keys.
  
@@ -74,10 +74,10 @@ index 8e2c1203e..d6c766380 100644
  
  `Ctrl+click` on a link opens it. `Shift+click` also opens it, but most
 diff --git a/docs/config-options.md b/docs/config-options.md
-index 9e7892a4e..15b0b72e8 100644
+index 1f9b2978f..a31d2659d 100644
 --- a/docs/config-options.md
 +++ b/docs/config-options.md
-@@ -622,9 +622,9 @@ The description of a table names its keys.
+@@ -624,9 +624,9 @@ The description of a table names its keys.
  
  | Key | Type | Default | Description |
  |---|---|---|---|
@@ -274,7 +274,7 @@ index 6249081d4..17963225d 100644
  
  // dockCustomWidth is the room a side's custom cells want.
 diff --git a/internal/app/hover_help.go b/internal/app/hover_help.go
-index 4e21489d9..9cad3ce3a 100644
+index 0e9a35173..fdd41c19d 100644
 --- a/internal/app/hover_help.go
 +++ b/internal/app/hover_help.go
 @@ -595,6 +595,12 @@ func (m *OS) helpDockCellComponent(name, parent string, rect image.Rectangle) he
@@ -284,7 +284,7 @@ index 4e21489d9..9cad3ce3a 100644
 +	case name == config.DockComponentHelp:
 +		c.title = "Help control"
 +		c.purpose = "The ? control. A click turns hover help on or off, and it is lit while " +
-+			"hover help is on. It is in no default list; a [dock] list that names \"help\" draws it."
++			"hover help is on. It is in no default list. A [dock] list that names \"help\" draws it."
 +		c.keys = m.helpKeys(config.ActionToggleHoverHelp)
 +		c.cli = []string{"tuios list-dock-components"}
  	case name == config.DockComponentButtons:
